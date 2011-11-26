@@ -1,1 +1,0 @@
-export set CLASSPATH=./connector_j/mysql-connector-java-5.1.18-bin.jar;$CLASSPATH
