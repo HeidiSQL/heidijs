@@ -1,0 +1,1 @@
+This uses the Connector/J class provided by MySQL. It can be found at: http://www.mysql.com/downloads/connector/j/

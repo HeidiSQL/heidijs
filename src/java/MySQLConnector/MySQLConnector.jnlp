@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jnlp spec="1.0+" codebase="" href="">
+	<information>
+		<title>MySQL Connector</title>
+
+		<vendor>zgardner@allofe.com</vendor>
+	</information>
+	<resources>
+		<!-- Application Resources -->
+		<j2se version="1.6+"
+			  href="http://java.sun.com/products/autodl/j2se"
+			  max-heap-size="128m" />
+
+		<jar href="MySQLConnector.jar" main="true" />
+
+	</resources>
+	<applet-desc 
+		 name="MySQL Connector"
+		 main-class="MySQLConnector"
+		 width="300"
+		 height="300">
+	 </applet-desc>
+</jnlp>
