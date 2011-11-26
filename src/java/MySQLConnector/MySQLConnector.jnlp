@@ -10,7 +10,7 @@
 		<j2se version="1.6+"
 			  href="http://java.sun.com/products/autodl/j2se"
 			  max-heap-size="128m" />
-
+		<jar href="connector_j/mysql-connector-java-5.1.18-bin.jar" />
 		<jar href="MySQLConnector.jar" main="true" />
 
 	</resources>
