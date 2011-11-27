@@ -11,6 +11,8 @@ $css_folder = $link_folder . "css/";
 $images_folder = $link_folder . "images/";
 $js_file_name = $scripts_folder . "heidi.js";
 $css_file_name = $css_folder . "heidi.css";
+$src_index_file = $src_folder . "index.html";
+$link_index_file = $link_folder . "index.html";
 
 
 //---Get Files---//
@@ -214,3 +216,11 @@ create_combined_file($scripts_folder, $js_file_name, $version_number, $src_class
 
 //---Create CSS File---//
 create_combined_file($css_folder, $css_file_name, $version_number, $src_classes_folder, $src_files["css"]);
+
+
+//---Copy Index File---//
+$copied_index_file = copy($src_index_file, $link_index_file);
+if($copied_index_file === false)	{
+	echo "Error: unable to copy index file.";
+	exit;
+}
