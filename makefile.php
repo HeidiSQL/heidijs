@@ -40,10 +40,58 @@ get_js_css_files_from_directory($classes_folder, $js_files, $css_files);
 $js_files[] = $src_folder . "bootstrap.js";
 
 
+//---Check Version Number---//
+$handle = @fopen($js_file_name, "r");
+if(!$handle)	{
+	echo "Error: Unable to open " . $js_file_name . " for reading.";
+	exit;
+}
+
+$first_line = @fgets($handle);
+if($first_line === false)	{
+	echo "Error: unable to read first line of " . $js_file_name . ".";
+	exit;
+}
+
+$version_number = array(
+	"major"=>0,
+	"minor"=>0,
+	"revision"=>0
+);
+
+$explode = explode("Version: ", $first_line);
+if(count($explode) == 2)	{
+	list($version_number["major"], $version_number["minor"], $version_number["revision"]) = explode(".", substr(trim($explode[1]), 0, -1));
+	
+	if($_REQUEST["major"])	{ // Mark this as a major version
+		$version_number["major"]++;
+		$version_number["minor"] = $version_number["revision"] = 0;
+	}
+	elseif($_REQUEST["minor"])	{ // Mark this as a minor version
+		$version_number["minor"]++;
+		$version_number["revision"] = 0;
+	}
+	else	{ // This is a revision version, increment it.
+		$version_number["revision"]++;
+	}
+}
+
+$version_number = implode(".", $version_number);
+
+
 //---Check File Open---//
 $handle = @fopen($js_file_name, "w");
 if(!$handle)	{
 	echo "Error: unable to open " . $js_file_name . " for writing.";
+	exit;
+}
+
+
+//---Write Header Information---//
+$header = "/*\tHeidiJS (Version: " . $version_number . ")\n\tGenerated: " . date("n/j/Y h:i:s A e") . "\n*/\n\n";
+$wrote_header = fwrite($handle, $header);
+if($wrote_header === false)	{
+	echo "Error: unable to write header to " . $js_file_name . ".";
 	exit;
 }
 
@@ -89,7 +137,7 @@ foreach($js_files as $file)	{
 	
 	
 	//---Write File---//
-	$wrote_contents = fwrite($handle, $file_contents);
+	$wrote_contents = fwrite($handle, str_replace("\r", "", $file_contents));
 	if($wrote_contents === false)	{
 		echo "Error: unable to write contents of " . $file . ".";
 		exit;
