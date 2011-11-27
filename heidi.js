@@ -1,5 +1,5 @@
-/*	HeidiJS (Version: 0.0.3)
-	Generated: 11/27/2011 03:30:35 PM UTC
+/*	HeidiJS (Version: 0.0.4)
+	Generated: 11/27/2011 03:34:42 PM UTC
 */
 
 //=====src/classes/viewport/Viewport.js=====//

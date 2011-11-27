@@ -8,8 +8,8 @@ $src_folder = "src/";
 $classes_folder = $src_folder . "classes/";
 
 
-//---Get JS Files---//
-function get_js_css_files_from_directory($in_directory, &$in_js_files, &$in_css_files)	{
+//---Get Files---//
+function get_src_files_from_directory($in_directory, &$in_src_files)	{
 	//---Get Files---//
 	$files = scandir($in_directory);
 	$files = array_flip($files);
@@ -22,22 +22,27 @@ function get_js_css_files_from_directory($in_directory, &$in_js_files, &$in_css_
 		$file_path = $in_directory . $file;
 	
 		if(is_dir($file_path))	{
-			get_js_css_files_from_directory($file_path . "/", $in_js_files, $in_css_files);
+			get_src_files_from_directory($file_path . "/", $in_src_files);
 			continue;
 		}
 		
 		if(substr_count(strtolower($file), ".js") == 1)	{
-			$in_js_files[] = $file_path;
+			$in_src_files["js"][] = $file_path;
 		}
 		elseif(substr_count(strtolower($file), ".css") == 1)	{
-			$in_css_files[] = $file_path;
+			$in_src_files["css"][] = $file_path;
 		}
 	}
 }
 
-$js_files = $css_files = array();
-get_js_css_files_from_directory($classes_folder, $js_files, $css_files);
-$js_files[] = $src_folder . "bootstrap.js";
+$src_files = array(
+	"js"=>array(),
+	"css"=>array(),
+	"images"=>array()
+);
+
+get_src_files_from_directory($classes_folder, $src_files);
+$src_files["js"][] = $src_folder . "bootstrap.js";
 
 
 //---Check Version Number---//
@@ -100,7 +105,7 @@ if($wrote_header === false)	{
 $delimiter = "";
 $namespaces_written = array();
 $js_classes_num_slashes = substr_count($classes_folder, "/");
-foreach($js_files as $file)	{
+foreach($src_files["js"] as $file)	{
 	//---Get Contents---//
 	$file_contents = @file_get_contents($file);
 	if($file_contents === false)	{
