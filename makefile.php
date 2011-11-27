@@ -48,16 +48,6 @@ get_src_files_from_directory($src_classes_folder, $src_files);
 $src_files["js"][] = $src_folder . "bootstrap.js";
 
 
-//---Create Scripts Folder---//
-if(!is_dir($scripts_folder))	{
-	$made_scripts_folder = mkdir($scripts_folder);
-	if($made_scripts_folder === false)	{
-		echo "Error: couldn't create folder " . $scripts_folder . ".";
-		exit;
-	}
-}
-
-
 //---Check Version Number---//
 $version_number = array(
 	"major"=>0,
@@ -99,71 +89,94 @@ else	{ // This is a revision version, increment it.
 $version_number = implode(".", $version_number);
 
 
-//---Check File Open---//
-$handle = @fopen($js_file_name, "w");
-if(!$handle)	{
-	echo "Error: unable to open " . $js_file_name . " for writing.";
-	exit;
-}
-
-
-//---Write Header Information---//
-$header = "/*\tHeidiJS (Version: " . $version_number . ")\n\tGenerated: " . date("n/j/Y h:i:s A e") . "\n*/\n\n";
-$wrote_header = fwrite($handle, $header);
-if($wrote_header === false)	{
-	echo "Error: unable to write header to " . $js_file_name . ".";
-	exit;
-}
-
-
-//---Write $js_file_name---//
-$delimiter = "";
-$namespaces_written = array();
-$js_classes_num_slashes = substr_count($src_classes_folder, "/");
-foreach($src_files["js"] as $file)	{
-	//---Get Contents---//
-	$file_contents = @file_get_contents($file);
-	if($file_contents === false)	{
-		echo "Error: unable to read contents of " . $file . ".";
-		exit;
-	}
-	
-	
-	//---Write File---//
-	$wrote_contents = fwrite($handle, $delimiter . "//=====" . $file . "=====//\n");
-	if($wrote_contents === false)	{
-		echo "Error: unable to write file header for " . $file . ".";
-		exit;
-	}
-	
-	
-	//---Get Namespace---//
-	$explode = explode("/", $file);
-	$explode = array_slice($explode, $js_classes_num_slashes, 1);
-	
-	if($explode)	{
-		$namespace = $namespace_prefix . "." . implode(".", $explode);
-		if(!$namespaces_written[$namespace])	{
-			$wrote_contents = fwrite($handle, "Ext.namespace(\"" . $namespace . "\");\n");
-			if($wrote_contents === false)	{
-				echo "Error: unable to write namespace " . $namespace . ".";
-				exit;
-			}
-			
-			$namespaces_written[$namespace] = true;
-			$delimiter = "\n\n";
+//---File Creator Function---//
+function create_combined_file($in_base_folder, $in_file_name, $in_version_number, $in_src_folder, $in_files, $in_write_namespace=false, $in_namespace_prefix="")	{
+	//---Create Scripts Folder---//
+	if(!is_dir($in_base_folder))	{
+		$made_folder = mkdir($in_base_folder);
+		if($made_folder === false)	{
+			echo "Error: couldn't create folder " . $made_folder . ".";
+			exit;
 		}
 	}
-	
-	
-	//---Write File---//
-	$wrote_contents = fwrite($handle, str_replace("\r", "", $file_contents));
-	if($wrote_contents === false)	{
-		echo "Error: unable to write contents of " . $file . ".";
+
+
+	//---Check File Open---//
+	$handle = @fopen($in_file_name, "w");
+	if(!$handle)	{
+		echo "Error: unable to open " . $in_file_name . " for writing.";
 		exit;
 	}
-	
-	$delimiter = "\n\n";
+
+
+	//---Write Header Information---//
+	$header = "/*\tHeidiJS (Version: " . $in_version_number . ")\n\tGenerated: " . date("n/j/Y h:i:s A e") . "\n*/\n\n";
+	$wrote_header = fwrite($handle, $header);
+	if($wrote_header === false)	{
+		echo "Error: unable to write header to " . $in_file_name . ".";
+		exit;
+	}
+
+
+	//---Write $in_file_name---//
+	$delimiter = "";
+	$namespaces_written = array();
+	$src_folder_num_slashes = substr_count($in_src_folder, "/");
+	foreach($in_files as $file)	{
+		//---Get Contents---//
+		$file_contents = @file_get_contents($file);
+		if($file_contents === false)	{
+			echo "Error: unable to read contents of " . $file . ".";
+			exit;
+		}
+		
+		
+		//---Write File---//
+		$wrote_contents = fwrite($handle, $delimiter . "//=====" . $file . "=====//\n");
+		if($wrote_contents === false)	{
+			echo "Error: unable to write file header for " . $file . ".";
+			exit;
+		}
+		
+		
+		//---Get Namespace---//
+		if($in_write_namespace)	{
+			$explode = explode("/", $file);
+			$explode = array_slice($explode, $src_folder_num_slashes, 1);
+			
+			if($explode)	{
+				$namespace = $in_namespace_prefix . "." . implode(".", $explode);
+				if(!$namespaces_written[$namespace])	{
+					$wrote_contents = fwrite($handle, "Ext.namespace(\"" . $namespace . "\");\n");
+					if($wrote_contents === false)	{
+						echo "Error: unable to write namespace " . $namespace . ".";
+						exit;
+					}
+					
+					$namespaces_written[$namespace] = true;
+					$delimiter = "\n\n";
+				}
+			}
+		}
+		
+		
+		//---Write File---//
+		$wrote_contents = fwrite($handle, str_replace("\r", "", $file_contents));
+		if($wrote_contents === false)	{
+			echo "Error: unable to write contents of " . $file . ".";
+			exit;
+		}
+		
+		$delimiter = "\n\n";
+	}
+
+	fclose($handle);
 }
 
-fclose($handle);
+
+//---Create JS File---//
+create_combined_file($scripts_folder, $js_file_name, $version_number, $src_classes_folder, $src_files["js"], true, $namespace_prefix);
+
+
+//---Create CSS File---//
+create_combined_file($css_folder, $css_file_name, $version_number, $src_classes_folder, $src_files["css"]);
