@@ -1,4 +1,0 @@
-MySQL Connector Example
-	Needed MySQL's Connector/J class. http://www.mysql.com/downloads/connector/j/
-	Followed the getting started guide. http://docs.oracle.com/javase/tutorial/jdbc/basics/gettingstarted.html
-	Download Apache Ant (winant) http://www.techdiscuss.net/how-to/installing-ant-on-windows.htm
