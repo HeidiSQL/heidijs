@@ -13,6 +13,7 @@ $js_file_name = $scripts_folder . "heidi.js";
 $css_file_name = $css_folder . "heidi.css";
 $src_index_file = $src_folder . "index.html";
 $link_index_file = $link_folder . "index.html";
+$version_file = $src_folder . "version.txt";
 
 
 //---Get Files---//
@@ -65,22 +66,22 @@ $version_number = array(
 	"revision"=>0
 );
 
-if(file_exists($js_file_name))	{
-	$handle = @fopen($js_file_name, "r");
+if(file_exists($version_file))	{
+	$handle = @fopen($version_file, "r");
 	if(!$handle)	{
-		echo "Error: Unable to open " . $js_file_name . " for reading.";
+		echo "Error: Unable to open " . $version_file . " for reading.";
 		exit;
 	}
 
 	$first_line = @fgets($handle);
 	if($first_line === false)	{
-		echo "Error: unable to read first line of " . $js_file_name . ".";
+		echo "Error: unable to read first line of " . $version_file . ".";
 		exit;
 	}
 
-	$explode = explode("Version: ", $first_line);
-	if(count($explode) == 2)	{
-		list($version_number["major"], $version_number["minor"], $version_number["revision"]) = explode(".", substr(trim($explode[1]), 0, -1));
+	$explode = explode(".", $first_line);
+	if(count($explode) == 3)	{
+		list($version_number["major"], $version_number["minor"], $version_number["revision"]) = $explode;
 	}
 }
 
@@ -97,6 +98,22 @@ else	{ // This is a revision version, increment it.
 }
 
 $version_number = implode(".", $version_number);
+
+
+//---Write Version---//
+$handle = fopen($version_file, "w");
+if($handle === false)	{
+	echo "Error: unable to open " . $version_file . " for writing.";
+	exit;
+}
+
+$wrote_version = fwrite($handle, $version_number);
+if($wrote_version === false)	{
+	echo "Error: unable to write version number.";
+	exit;
+}
+
+fclose($handle);
 
 
 //---Create Images Folder---//
