@@ -1,11 +1,14 @@
 <?
 
 //---Configuration---//
-$js_file_name = "heidi.js";
-$css_file_name = "heidi.css";
 $namespace_prefix = "Heidi";
 $src_folder = "src/";
-$classes_folder = $src_folder . "classes/";
+$src_classes_folder = $src_folder . "classes/";
+$scripts_folder = "scripts/";
+$css_folder = "css/";
+$images_folder = "images/";
+$js_file_name = $scripts_folder . "heidi.js";
+$css_file_name = $css_folder . "heidi.css";
 
 
 //---Get Files---//
@@ -41,44 +44,56 @@ $src_files = array(
 	"images"=>array()
 );
 
-get_src_files_from_directory($classes_folder, $src_files);
+get_src_files_from_directory($src_classes_folder, $src_files);
 $src_files["js"][] = $src_folder . "bootstrap.js";
 
 
+//---Create Scripts Folder---//
+if(!is_dir($scripts_folder))	{
+	$made_scripts_folder = mkdir($scripts_folder);
+	if($made_scripts_folder === false)	{
+		echo "Error: couldn't create folder " . $scripts_folder . ".";
+		exit;
+	}
+}
+
+
 //---Check Version Number---//
-$handle = @fopen($js_file_name, "r");
-if(!$handle)	{
-	echo "Error: Unable to open " . $js_file_name . " for reading.";
-	exit;
-}
-
-$first_line = @fgets($handle);
-if($first_line === false)	{
-	echo "Error: unable to read first line of " . $js_file_name . ".";
-	exit;
-}
-
 $version_number = array(
 	"major"=>0,
 	"minor"=>0,
 	"revision"=>0
 );
 
-$explode = explode("Version: ", $first_line);
-if(count($explode) == 2)	{
-	list($version_number["major"], $version_number["minor"], $version_number["revision"]) = explode(".", substr(trim($explode[1]), 0, -1));
-	
-	if($_REQUEST["major"])	{ // Mark this as a major version
-		$version_number["major"]++;
-		$version_number["minor"] = $version_number["revision"] = 0;
+if(file_exists($js_file_name))	{
+	$handle = @fopen($js_file_name, "r");
+	if(!$handle)	{
+		echo "Error: Unable to open " . $js_file_name . " for reading.";
+		exit;
 	}
-	elseif($_REQUEST["minor"])	{ // Mark this as a minor version
-		$version_number["minor"]++;
-		$version_number["revision"] = 0;
+
+	$first_line = @fgets($handle);
+	if($first_line === false)	{
+		echo "Error: unable to read first line of " . $js_file_name . ".";
+		exit;
 	}
-	else	{ // This is a revision version, increment it.
-		$version_number["revision"]++;
+
+	$explode = explode("Version: ", $first_line);
+	if(count($explode) == 2)	{
+		list($version_number["major"], $version_number["minor"], $version_number["revision"]) = explode(".", substr(trim($explode[1]), 0, -1));
 	}
+}
+
+if($_REQUEST["major"])	{ // Mark this as a major version
+	$version_number["major"]++;
+	$version_number["minor"] = $version_number["revision"] = 0;
+}
+elseif($_REQUEST["minor"])	{ // Mark this as a minor version
+	$version_number["minor"]++;
+	$version_number["revision"] = 0;
+}
+else	{ // This is a revision version, increment it.
+	$version_number["revision"]++;
 }
 
 $version_number = implode(".", $version_number);
@@ -104,7 +119,7 @@ if($wrote_header === false)	{
 //---Write $js_file_name---//
 $delimiter = "";
 $namespaces_written = array();
-$js_classes_num_slashes = substr_count($classes_folder, "/");
+$js_classes_num_slashes = substr_count($src_classes_folder, "/");
 foreach($src_files["js"] as $file)	{
 	//---Get Contents---//
 	$file_contents = @file_get_contents($file);
