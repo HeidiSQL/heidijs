@@ -1,7 +1,8 @@
-/*	HeidiJS (Version: 0.0.4)
-	Generated: 11/27/2011 06:18:51 PM UTC
+/*	HeidiJS (Version: 0.0.12)
+	Generated: 11/27/2011 09:27:42 PM UTC
 */
 
-//=====src/classes/window/css/ConnectionManager.css=====//
+/*=====src/classes/window/css/ConnectionManager.css=====*/
 .icon-connection-manager {
+	background-image: url(../images/application_cascade.png);
 }

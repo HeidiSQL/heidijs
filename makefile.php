@@ -4,6 +4,7 @@
 $namespace_prefix = "Heidi";
 $src_folder = "src/";
 $src_classes_folder = $src_folder . "classes/";
+$src_icons_folder = $src_folder . "icons/";
 $scripts_folder = "scripts/";
 $css_folder = "css/";
 $images_folder = "images/";
@@ -29,11 +30,16 @@ function get_src_files_from_directory($in_directory, &$in_src_files)	{
 			continue;
 		}
 		
-		if(substr_count(strtolower($file), ".js") == 1)	{
+		$file_lower = strtolower($file);
+		
+		if(substr_count($file_lower, ".js") == 1)	{
 			$in_src_files["js"][] = $file_path;
 		}
-		elseif(substr_count(strtolower($file), ".css") == 1)	{
+		elseif(substr_count($file_lower, ".css") == 1)	{
 			$in_src_files["css"][] = $file_path;
+		}
+		elseif(substr_count($file_lower, ".png") == 1)	{
+			$in_src_files["images"][] = $file_path;
 		}
 	}
 }
@@ -46,6 +52,7 @@ $src_files = array(
 
 get_src_files_from_directory($src_classes_folder, $src_files);
 $src_files["js"][] = $src_folder . "bootstrap.js";
+get_src_files_from_directory($src_icons_folder, $src_files);
 
 
 //---Check Version Number---//
@@ -87,6 +94,32 @@ else	{ // This is a revision version, increment it.
 }
 
 $version_number = implode(".", $version_number);
+
+
+//---Create Images Folder---//
+if(!is_dir($images_folder))	{
+	$made_images_folder = mkdir($images_folder);
+	if($made_images_folder === false)	{
+		echo "Error: couldn't create " . $images_folder . " folder.";
+		exit;
+	}
+}
+
+
+//---Populate Images Folder---//
+foreach($src_files["images"] as $image_file)	{
+	$explode = explode("/", $image_file);
+	$destination_file = $images_folder . array_pop($explode);
+	if(file_exists($destination_file))	{
+		continue;
+	}
+	
+	$copied_image = copy($image_file, $destination_file);
+	if($copied_image === false)	{
+		echo "Error: unable to copy image " . $image_file . ".";
+		exit;
+	}
+}
 
 
 //---File Creator Function---//
@@ -132,7 +165,7 @@ function create_combined_file($in_base_folder, $in_file_name, $in_version_number
 		
 		
 		//---Write File---//
-		$wrote_contents = fwrite($handle, $delimiter . "//=====" . $file . "=====//\n");
+		$wrote_contents = fwrite($handle, $delimiter . "/*=====" . $file . "=====*/\n");
 		if($wrote_contents === false)	{
 			echo "Error: unable to write file header for " . $file . ".";
 			exit;
