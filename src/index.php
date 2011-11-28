@@ -1,8 +1,22 @@
 <?
 
-//---Run Makefile---//
-include_once("makefile.php");
+//---Start Session---//
+session_start();
 
 
-//---Include HTML---//
-include_once("index.html");
+//---Check Automake---//
+if(!array_key_exists("automake", $_SESSION))	{
+	$_SESSION["automake"] = true;
+}
+
+if($_SESSION["automake"])	{
+	$_SESSION["automake"] = false;
+	echo "<script type='text/javascript'>document.location.href = '../src/makefile.php?automake=1';</script>";
+	return false;
+}
+
+$_SESSION["automake"] = true;
+
+
+//---Include index.html---//
+?>

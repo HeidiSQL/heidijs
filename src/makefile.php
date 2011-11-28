@@ -12,7 +12,9 @@ $images_folder = $link_folder . "images/";
 $js_file_name = $scripts_folder . "heidi.js";
 $css_file_name = $css_folder . "heidi.css";
 $src_index_file = $src_folder . "index.html";
-$link_index_file = $link_folder . "index.html";
+$src_automake_index_file = $src_folder . "index.php";
+$automake = (array_key_exists("automake", $_REQUEST) ? $_REQUEST["automake"] : false);
+$link_index_file = $link_folder . "index." . ($automake ? "php" : "html");
 $version_file = $src_folder . "version.txt";
 
 
@@ -236,8 +238,16 @@ create_combined_file($css_folder, $css_file_name, $version_number, $src_classes_
 
 
 //---Copy Index File---//
-$copied_index_file = copy($src_index_file, $link_index_file);
+$index_file_contents = ($automake ? file_get_contents($src_automake_index_file) : "") . file_get_contents($src_index_file);
+$copied_index_file = file_put_contents($link_index_file, $index_file_contents);
 if($copied_index_file === false)	{
 	echo "Error: unable to copy index file.";
 	exit;
+}
+
+
+//---Check Automake---//
+if($automake)	{
+	echo "<script type='text/javascript'>document.location.href = '" . $link_index_file . "';</script>";
+	return false;
 }
