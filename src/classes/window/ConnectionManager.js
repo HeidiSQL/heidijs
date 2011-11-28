@@ -50,6 +50,14 @@ Ext.define("Heidi.window.ConnectionManager", {
 			width:150,
 			region:"west",
 			forceFit:true,
+			selModel:{
+				selType:"cellmodel"
+			},
+			plugins:[
+				Ext.create("Ext.grid.plugin.CellEditing", {
+					clicksToEdit:1
+				})
+			],
 			dockedItems:[
 				{
 					xtype:"toolbar",
@@ -72,7 +80,19 @@ debugger;
 						}
 					]
 				}
-			]
+			],
+			listeners:{
+				viewready:function()	{
+					if(!this.store.getCount())	{
+						this.store.add({
+							name:"Unsaved Session"
+						});
+					}
+					
+debugger;
+					this.getSelectionModel().select(this.store.getAt(0));
+				}
+			}
 		},
 		{
 			xtype:"tabpanel",
@@ -81,7 +101,9 @@ debugger;
 				xtype:"form",
 				bodyCls:"body-connection-manager-tab",
 				defaults:{
-					anchor:"100%"
+					defaults:{
+						anchor:"100%"
+					}
 				}
 			},
 			items:[
@@ -92,7 +114,14 @@ debugger;
 					defaults:{
 						listeners:{
 							afterrender:function()	{
-debugger;
+								var connectButton = this.ownerCt.dockedItems.findBy(function(inDockedItem) { return inDockedItem.dock == "bottom"; }).items.findBy(function(inItem) { return inItem.connectButton; });
+								
+								Ext.create("Ext.util.KeyMap", this.el.dom.id, {
+									key:Ext.EventObject.ENTER,
+									fn:function()	{
+										connectButton.handler();
+									}
+								});
 							}
 						}
 					},
@@ -100,12 +129,14 @@ debugger;
 						{
 							xtype:"textfield",
 							fieldLabel:"Hostname / IP",
-							name:"hostname_ip"
+							name:"hostname_ip",
+							allowBlank:false
 						},
 						{
 							xtype:"textfield",
 							fieldLabel:"Username",
-							name:"username"
+							name:"username",
+							allowBlank:false
 						},
 						{
 							xtype:"textfield",
@@ -120,7 +151,8 @@ debugger;
 							minValue:1,
 							maxValue:65536,
 							value:3306,
-							allowDecimals:false
+							allowDecimals:false,
+							allowBlank:false
 						}
 					],
 					buttons:[
@@ -128,7 +160,15 @@ debugger;
 							text:"Connect",
 							connectButton:true,
 							handler:function()	{
-debugger;
+								var form = this.ownerCt.ownerCt.getForm();
+								
+								if(!form.isValid())	{
+									return Ext.MessageBox.alert("Error", "Please complete the form before connecting.");
+								}
+								
+								var values = form.getValues();
+								
+debugger;							
 							}
 						},
 						{
