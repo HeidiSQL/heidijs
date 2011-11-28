@@ -227,7 +227,7 @@ function create_combined_file($in_base_folder, $in_file_name, $in_version_number
 			$explode = array_slice($explode, $src_folder_num_slashes, 1);
 			
 			if($explode)	{
-				$namespace = $in_namespace_prefix . "." . implode(".", $explode);
+				$namespace = $in_namespace_prefix . (!substr_count(end($explode), ".js") ? "." . implode(".", $explode) : "");
 				if(!$namespaces_written[$namespace])	{
 					$wrote_contents = fwrite($handle, "Ext.namespace(\"" . $namespace . "\");\n");
 					if($wrote_contents === false)	{
