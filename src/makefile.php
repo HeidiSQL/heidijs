@@ -19,7 +19,25 @@ $version_file = $src_folder . "version.txt";
 
 
 //---Remove Link Folder---//
-exec("rm -rf " . $link_folder);
+function rrmdir($dir) { // http://www.php.net/manual/en/function.rmdir.php#98622
+	if (is_dir($dir)) { 
+		$objects = scandir($dir); 
+		foreach ($objects as $object) { 
+			if ($object != "." && $object != "..") { 
+				if (filetype($dir."/".$object) == "dir") {
+					rrmdir($dir."/".$object);
+				}
+				else	{
+					unlink($dir."/".$object); 
+				}
+			}
+			reset($objects); 
+			rmdir($dir); 
+		} 
+	}
+}
+
+rrmdir($link_folder);
 
 $made_link_folder = mkdir($link_folder);
 if($made_link_folder === false)	{
