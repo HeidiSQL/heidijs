@@ -1,3 +1,26 @@
+/*---Icons---*/
 .icon-connection-manager {
 	background-image: url(../images/application_cascade.png);
+}
+
+.icon-connection-manager-connections-add {
+	background-image: url(../images/application_add.png);
+}
+
+.icon-connection-manager-connections-delete {
+	background-image: url(../images/application_delete.png);
+}
+
+.icon-connection-manager-settings {
+	background-image: url(../images/application_link.png);
+}
+
+.icon-connection-manager-statistics {
+	background-image: url(../images/chart_bar.png);
+}
+
+
+/*---TabPanel---*/
+.body-connection-manager-tab {
+	padding: 3px;
 }

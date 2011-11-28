@@ -16,6 +16,7 @@ $src_automake_index_file = $src_folder . "index.php";
 $automake = (array_key_exists("automake", $_REQUEST) ? $_REQUEST["automake"] : false);
 $link_index_file = $link_folder . "index." . ($automake ? "php" : "html");
 $version_file = $src_folder . "version.txt";
+$src_overrides_file = $src_folder . "overrides.css";
 
 
 //---Remove Link Folder---//
@@ -87,6 +88,7 @@ $src_files = array(
 get_src_files_from_directory($src_classes_folder, $src_files);
 $src_files["js"][] = $src_folder . "bootstrap.js";
 get_src_files_from_directory($src_icons_folder, $src_files);
+$src_files["css"][] = $src_overrides_file;
 
 
 //---Check Version Number---//

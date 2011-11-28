@@ -1,0 +1,3 @@
+.x-tab-default-top button, .x-tab-default-top .x-tab-inner {
+	height: 18px; /* ExtJS 4.0.7 didn't have enough tab height for the icons to show completely. */
+}
