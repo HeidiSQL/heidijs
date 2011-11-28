@@ -32,7 +32,7 @@ function rrmdir($dir) { // http://www.php.net/manual/en/function.rmdir.php#98622
 				}
 			}
 			reset($objects); 
-			rmdir($dir); 
+			@rmdir($dir); 
 		} 
 	}
 }
