@@ -89,6 +89,13 @@ debugger;
 					title:"Settings",
 					iconCls:"icon-connection-manager-settings",
 					
+					defaults:{
+						listeners:{
+							afterrender:function()	{
+debugger;
+							}
+						}
+					},
 					items:[
 						{
 							xtype:"textfield",
@@ -114,6 +121,21 @@ debugger;
 							maxValue:65536,
 							value:3306,
 							allowDecimals:false
+						}
+					],
+					buttons:[
+						{
+							text:"Connect",
+							connectButton:true,
+							handler:function()	{
+debugger;
+							}
+						},
+						{
+							text:"Reset",
+							handler:function()	{
+debugger;
+							}
 						}
 					]
 				},
