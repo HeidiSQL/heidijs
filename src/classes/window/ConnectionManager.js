@@ -1,6 +1,4 @@
-Ext.define("Heidi.window.ConnectionManager", {
-	extend:"Ext.window.Window",
-
+Heidi.window.ConnectionManager = Ext.create("Ext.window.Window", {
 	iconCls:"icon-connection-manager",
 	title:"Connection Manager",
 	width:500,
