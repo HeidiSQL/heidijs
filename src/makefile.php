@@ -18,6 +18,16 @@ $link_index_file = $link_folder . "index." . ($automake ? "php" : "html");
 $version_file = $src_folder . "version.txt";
 
 
+//---Remove Link Folder---//
+exec("rm -rf " . $link_folder);
+
+$made_link_folder = mkdir($link_folder);
+if($made_link_folder === false)	{
+	echo "Error: unable to make link folder at " . $link_folder . ".";
+	exit;
+}
+
+
 //---Get Files---//
 function get_src_files_from_directory($in_directory, &$in_src_files)	{
 	//---Get Files---//
@@ -132,9 +142,6 @@ if(!is_dir($images_folder))	{
 foreach($src_files["images"] as $image_file)	{
 	$explode = explode("/", $image_file);
 	$destination_file = $images_folder . array_pop($explode);
-	if(file_exists($destination_file))	{
-		continue;
-	}
 	
 	$copied_image = copy($image_file, $destination_file);
 	if($copied_image === false)	{
