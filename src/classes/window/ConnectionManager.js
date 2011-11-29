@@ -104,7 +104,8 @@
 					
 						if(!this.store.getCount())	{
 							this.store.add({
-								name:unsavedSessionName
+								name:unsavedSessionName,
+								port:3306
 							});
 						}
 						
@@ -145,6 +146,49 @@
 						},
 						items:[
 							{
+								xtype:"combobox",
+								fieldLabel:"Type",
+								name:"proxy_type",
+								displayField:"proxyName",
+								valueField:"proxyName",
+								queryMode:"local",
+								store:{
+									proxy:{
+										type:"memory",
+										reader:{
+											type:"json"
+										}
+									},
+									model:Ext.define("HeidiConnectionManagerProxyTypeModel", {
+										extend:"Ext.data.Model",
+										fields:[
+											"proxyName"
+										]
+									}) && "HeidiConnectionManagerProxyTypeModel"
+								},
+								listeners:{
+									afterrender:function()	{
+										var storeData = [];
+										
+										Ext.Array.each(Heidi.ProxyManager.getNames(), function(inProxyName)	{
+											storeData.push({
+												proxyName:inProxyName
+											});
+										});
+										
+										this.store.loadData(storeData);
+									},
+									change:function()	{
+										if(this.store.getCount() == 1)	{
+											var firstValue = this.store.data.get(0).get(this.valueField);
+											if(this.getValue() != firstValue)	{
+												this.select(firstValue);
+											}
+										}
+									}
+								}
+							},
+							{
 								xtype:"textfield",
 								fieldLabel:"Hostname / IP",
 								name:"hostname_ip",
@@ -168,7 +212,6 @@
 								name:"port",
 								minValue:1,
 								maxValue:65536,
-								value:3306,
 								allowDecimals:false,
 								allowBlank:false
 							}
@@ -267,8 +310,12 @@
 											connectToServer();
 										},
 										connectToServer = function()	{
+											var proxy = Heidi.ProxyManager.create(selectedSession.get("proxy_type"));
+										
 											Ext.MessageBox.wait("Please wait while connecting to the server...", "Connecting");
-debugger;
+											
+											proxy.establishConnection(selectedSession, function(inConnectionId)	{
+											});
 										};
 									
 									Ext.Object.each(values, function(inKey, inValue)	{

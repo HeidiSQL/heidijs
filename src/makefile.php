@@ -17,6 +17,7 @@ $automake = (array_key_exists("automake", $_REQUEST) ? $_REQUEST["automake"] : f
 $link_index_file = $link_folder . "index." . ($automake ? "php" : "html");
 $version_file = $src_folder . "version.txt";
 $src_overrides_file = $src_folder . "overrides.css";
+$link_providers_folder = $link_folder . "providers/";
 
 
 //---Remove Link Folder---//
@@ -66,6 +67,7 @@ function get_src_files_from_directory($in_directory, &$in_src_files)	{
 		}
 		
 		$file_lower = strtolower($file);
+		$file_path_lower = strtolower($file_path);
 		
 		if(substr_count($file_lower, ".js") == 1)	{
 			$in_src_files["js"][] = $file_path;
@@ -76,13 +78,17 @@ function get_src_files_from_directory($in_directory, &$in_src_files)	{
 		elseif(substr_count($file_lower, ".png") == 1)	{
 			$in_src_files["images"][] = $file_path;
 		}
+		elseif(substr_count($file_lower, ".php") == 1 && substr_count($file_path_lower, "/providers/") == 1)	{
+			$in_src_files["providers"][] = $file_path;
+		}
 	}
 }
 
 $src_files = array(
 	"js"=>array(),
 	"css"=>array(),
-	"images"=>array()
+	"images"=>array(),
+	"providers"=>array()
 );
 
 get_src_files_from_directory($src_classes_folder, $src_files);
@@ -262,6 +268,40 @@ create_combined_file($scripts_folder, $js_file_name, $version_number, $src_class
 
 //---Create CSS File---//
 create_combined_file($css_folder, $css_file_name, $version_number, $src_classes_folder, $src_files["css"]);
+
+
+//---Copy Providers---//
+if(!is_dir($link_providers_folder))	{
+	$made_providers_folder = mkdir($link_providers_folder);
+	if($made_providers_folder === false)	{
+		echo "Error: unable to make providers folder.";
+		exit;
+	}
+}
+
+foreach($src_files["providers"] as $src_provider_file_path)	{
+	$link_provider_file_path = str_replace(array("providers/", $src_classes_folder), array("", $link_providers_folder), $src_provider_file_path);
+	$explode = explode("/", $link_provider_file_path);
+	$folders_checked = array_shift($explode);
+	array_pop($explode);
+	foreach($explode as $folder_to_check)	{
+		$folder_to_check = $folders_checked . "/" . $folder_to_check;
+		if(!is_dir($folder_to_check))	{
+			$made_folder = mkdir($folder_to_check);
+			if($made_folder === false)	{
+				echo "Error: unable to make provider folder " . $folder_to_check . ".";
+				exit;
+			}
+		}
+		$folders_checked = $folder_to_check;
+	}
+
+	$copied_provider_file = copy($src_provider_file_path, $link_provider_file_path);
+	if($copied_provider_file === false)	{
+		echo "Error: unable to copy provider file " . $src_provider_file_path . " to link folder.";
+		exit;
+	}
+}
 
 
 //---Copy Index File---//
