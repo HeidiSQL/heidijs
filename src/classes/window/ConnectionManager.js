@@ -197,7 +197,77 @@
 												Ext.MessageBox.alert("Warning", "Your sessions couldn't be saved.", checkForPassword);
 											}
 										},
+										password = false,
 										checkForPassword = function()	{
+											password = selectedSession.get("password");
+											
+											if(!password)	{
+												var passwordWindow = Ext.create("Ext.window.Window", {
+													title:"Password",
+													width:400,
+													height:100,
+													modal:true,
+													layout:"fit",
+													items:[
+														{
+															xtype:"form",
+															border:false,
+															bodyCls:"body-connection-manager-password-window",
+															items:[
+																{
+																	xtype:"textfield",
+																	fieldLabel:"Password",
+																	name:"password",
+																	inputType:"password",
+																	anchor:"100%",
+																	allowBlank:false,
+																	listeners:{
+																		afterrender:function()	{
+																			var me = this,
+																				connectButton = me.ownerCt.ownerCt.dockedItems.findBy(function(inDockedItem) { return inDockedItem.dock == "bottom"; }).getComponent(0);
+																		
+																			this.focus();
+																		
+																			Ext.create("Ext.KeyMap", me.el.dom.id, {
+																				key:Ext.EventObject.ENTER,
+																				fn:function()	{
+																					connectButton.handler();
+																				}
+																			});
+																			
+																		}
+																	}
+																}
+															]
+														}
+													],
+													buttons:[
+														{
+															text:"Connect",
+															handler:function()	{
+																var form = this.ownerCt.ownerCt.getComponent(0).getForm();
+																
+																if(!form.isValid())	{
+																	return Ext.MessageBox.alert("Error", "Please enter a password.", function()	{
+																		form.getFields().get(0).focus();
+																	});
+																}
+																
+																password = form.getValues().password;
+																passwordWindow.hide();
+																connectToServer();
+															}
+														}
+													]
+												});
+												
+												return passwordWindow.show();
+											}
+											
+											connectToServer();
+										},
+										connectToServer = function()	{
+											Ext.MessageBox.wait("Please wait while connecting to the server...", "Connecting");
 debugger;
 										};
 									

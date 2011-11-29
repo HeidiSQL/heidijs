@@ -21,6 +21,6 @@
 
 
 /*---TabPanel---*/
-.body-connection-manager-tab {
+.body-connection-manager-tab, .body-connection-manager-password-window {
 	padding: 3px;
 }
