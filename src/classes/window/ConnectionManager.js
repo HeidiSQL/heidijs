@@ -428,6 +428,19 @@
 			inRecord.set("num_unsuccessful_connections", inRecord.get("num_unsuccessful_connections") + 1);
 			
 			inRecord.store.sync();
+		},
+		
+		getConnectionInformation:function(inConnectionId)	{
+			var record = connectionIdXRecord[inConnectionId];
+			if(!record)	{
+				return false;
+			}
+		
+			return {
+				connectionId:inConnectionId,
+				name:record.get("name"),
+				proxyType:record.get("proxy_type")
+			};
 		}
 	});
 })();

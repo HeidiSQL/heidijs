@@ -1,4 +1,49 @@
 Ext.onReady(function()	{
+	//---Constants---//
+	var CENTER_BORDER_LAYOUT_PADDING = "5 0 5 0",
+		CONNECTIONS_TREE_PANEL_MODEL_NAME = "HeidiViewportConnectionsTreePanelModel";
+
+
+	//---Connections TreePanel---//
+	var connectionsTreePanelProxy = Ext.create("Ext.data.proxy.Memory", {
+		read:function()	{
+debugger;
+		},
+		reader:{
+			type:"json"
+		}
+	});
+	
+	if(!Ext.ModelManager.getModel(CONNECTIONS_TREE_PANEL_MODEL_NAME))	{
+		Ext.define(CONNECTIONS_TREE_PANEL_MODEL_NAME, {
+			extend:"Ext.data.Model",
+			fields:[
+				"id",
+				"connectionId",
+				"type",
+				"text",
+				"iconCls",
+				"proxyType"
+			]
+		});
+	}
+	
+	var connectionsTreePanel = Ext.create("Ext.tree.Panel", {
+		region:"west",
+		width:250,
+		padding:CENTER_BORDER_LAYOUT_PADDING,
+		store:{
+			xtype:"treestore",
+			model:CONNECTIONS_TREE_PANEL_MODEL_NAME,
+			proxy:connectionsTreePanelProxy
+		},
+		useArrows:true,
+		rootVisible:false,
+		singleExpand:true
+	});
+
+
+	//---Define Singleton---//
 	Heidi.container.Viewport = Ext.create("Ext.container.Viewport", {
 		layout:"fit",
 		items:[
@@ -30,17 +75,11 @@ Ext.onReady(function()	{
 							split:true
 						},
 						items:[
-							{
-								xtype:"panel",
-								region:"west",
-								width:250,
-								html:"Connections",
-								padding:"5 0 5 0"
-							},
+							connectionsTreePanel,
 							{
 								xtype:"tabpanel",
 								region:"center",
-								padding:"5 0 5 0",
+								padding:CENTER_BORDER_LAYOUT_PADDING,
 								items:[
 									{
 										xtype:"panel",
@@ -85,7 +124,18 @@ Ext.onReady(function()	{
 		],
 		
 		addConnection:function(inConnectionId)	{
-	debugger;
+			var connectionInformation = Heidi.window.ConnectionManager.getConnectionInformation(inConnectionId),
+				connectionNode = Ext.create(CONNECTIONS_TREE_PANEL_MODEL_NAME, {
+					id:connectionInformation.connectionId,
+					connectionId:connectionInformation.connectionId,
+					type:"connection",
+					text:connectionInformation.name,
+					iconCls:"icon-connections-connection",
+					proxyType:connectionInformation.proxyType
+				});
+			
+			connectionsTreePanel.store.tree.root.appendChild(connectionNode);
+			connectionNode.expand();
 		}
 	});
 });

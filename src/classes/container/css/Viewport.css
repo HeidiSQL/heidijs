@@ -1,3 +1,10 @@
+/* Panel Icons */
 .icon-viewport-heidi-js	{
 	background-image: url(../images/icon_heidi_js.png);
+}
+
+
+/* Connection Icons */
+.icon-connections-connection	{
+	background-image: url(../images/computer.png);
 }
