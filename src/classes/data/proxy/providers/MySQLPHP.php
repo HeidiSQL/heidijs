@@ -30,10 +30,7 @@ if($_REQUEST["flag"] == "establish_connection")	{
 	
 	$connection = @call_user_func_array($connect_function, $connect_function_params);
 	if($connection === false)	{
-		$response = array(
-			"type"=>"error",
-			"message"=>"There was an error when establishing a connection. Automated error: " . mysql_error()
-		);
+		display_response(false, "There was an error when establishing a connection. Automated error: " . mysql_error());
 	}
 	else	{
 		//---Store Connection Information---//
@@ -46,11 +43,68 @@ if($_REQUEST["flag"] == "establish_connection")	{
 			"connect_function_params"=>$connect_function_params
 		);
 	
-		$response = array(
-			"type"=>"success",
-			"message"=>$connection_id
-		);
+		display_response(true, $connection_id);
 	}
 }
 
-echo json_encode($response);
+
+//---Establish Connection---//
+if(!array_key_exists("connection_id", $_REQUEST))	{
+	exit;
+}
+
+$connection_information = $_SESSION["connections"][$_REQUEST["connection_id"]];
+$connection = @call_user_func_array("call_user_func_array", $connection_information);
+if($connection)	{
+	display_response(false, "There was an error when establishing a connection. Automated error: " . mysql_error());
+}
+
+
+//---Check Flag---//
+switch($_REQUEST["flag"])	{
+	case "load_databases":
+		$records = run_query_and_get_records($connection, "SHOW DATABASES");
+print_r($records);
+exit;
+		
+		break;
+}
+
+
+//---Functions---//
+function display_response($in_success, $in_message)	{
+	echo json_encode(array("type"=>($in_success ? "success" : "error"), "message"=>$in_message));
+	exit;
+}
+
+function run_query_and_get_records(&$in_connection, $in_query, $in_start=0, $in_limit=0)	{
+	//---Get Results---//
+	$results = @mysql_query($in_query, $in_connection);
+	if($results === false)	{
+var_dump($in_query);
+		display_response(false, "Unable to process query at this time. Automated error: " . mysql_error());
+	}
+	
+	
+	//---Data Seek---//
+	if($in_start)	{
+		mysql_data_seek($results, $in_start);
+	}
+
+
+	//---Generate Return Array---//
+	$return_array = array();
+	$count = 0;
+	
+	while($record = mysql_fetch_assoc($results))	{
+		$return_array[] = $record;
+		
+		$count++;
+		if($count == $in_limit)	{
+			break;
+		}
+	}
+	
+	return $return_array;
+	
+}

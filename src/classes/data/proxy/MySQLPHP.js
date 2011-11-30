@@ -27,6 +27,31 @@ Ext.define("Heidi.data.proxy.MySQLPHP", {
 		this.extraParams = Ext.apply(this.extraParams || {}, {
 			connection_id:inConnectionId
 		});
+	},
+	
+	loadConnectionChildren:function(inNode, inCallback)	{
+		//---Determine Flag---//
+		var parentId = inNode.get("parentId");
+		if(parentId == "root")	{ // At the host level, need to load the children
+			var flag = "load_databases";
+		}
+		else	{
+			return false;
+		}
+		
+		
+		//---Make Request---//
+		Ext.Ajax.request({
+			url:this.url,
+			params:Ext.apply({
+				flag:flag
+			}, this.extraParams),
+			success:function(inResponse)	{
+debugger;
+			}
+		});
+		
+		return true;
 	}
 });
 

@@ -6,8 +6,23 @@ Ext.onReady(function()	{
 
 	//---Connections TreePanel---//
 	var connectionsTreePanelProxy = Ext.create("Ext.data.proxy.Memory", {
-		read:function()	{
+		read:function(inOperation, inCallback, inScope)	{
+			//---Prevent Root Loading---//
+			if(inOperation.node.get("id") == "root")	{
+				return false;
+			}
+			
+			
+			//---Create Connection Proxy---//
+			var connectionId = inOperation.node.get("connectionId"),
+				nodeProxyInstance = Heidi.window.ConnectionManager.getProxyInstanceFromConnectionId(connectionId);
+				canLoadChildren = nodeProxyInstance.loadConnectionChildren(inOperation.node, function(inChildren)	{
 debugger;
+				});
+			
+			if(!canLoadChildren)	{
+				return Ext.MessageBox.alert("Error", "Your request could not be processed. Error Code: ccV24");
+			}
 		},
 		reader:{
 			type:"json"

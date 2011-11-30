@@ -441,6 +441,17 @@
 				name:record.get("name"),
 				proxyType:record.get("proxy_type")
 			};
+		},
+		getProxyInstanceFromConnectionId:function(inConnectionId)	{
+			var record = connectionIdXRecord[inConnectionId];
+			if(!record)	{
+				return false;
+			}
+			
+			var proxyInstance = Heidi.ProxyManager.create(record.get("proxy_type"));
+			proxyInstance.bindToConnection(inConnectionId);
+			
+			return proxyInstance;
 		}
 	});
 })();
