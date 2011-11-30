@@ -1,0 +1,1 @@
+Heidi.version = "%%VERSION_NUMBER%%";

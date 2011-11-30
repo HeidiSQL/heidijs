@@ -49,7 +49,7 @@ debugger;
 		items:[
 			{
 				xtype:"panel",
-				title:"HeidiJS",
+				title:"HeidiJS (Version: " + Heidi.version + ")",
 				iconCls:"icon-viewport-heidi-js",
 				layout:"border",
 				border:false,

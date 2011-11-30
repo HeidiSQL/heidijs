@@ -233,16 +233,22 @@ function create_combined_file($in_base_folder, $in_file_name, $in_version_number
 			$explode = array_slice($explode, $src_folder_num_slashes, 1);
 			
 			if($explode)	{
-				$namespace = $in_namespace_prefix . (!substr_count(end($explode), ".js") ? "." . implode(".", $explode) : "");
-				if(!$namespaces_written[$namespace])	{
-					$wrote_contents = fwrite($handle, "Ext.namespace(\"" . $namespace . "\");\n");
-					if($wrote_contents === false)	{
-						echo "Error: unable to write namespace " . $namespace . ".";
-						exit;
+				$explode_file_name = end($explode);
+				if($explode_file_name != "version.js")	{				
+					$namespace = $in_namespace_prefix . (!substr_count($explode_file_name, ".js") ? "." . implode(".", $explode) : "");
+					if(!$namespaces_written[$namespace])	{
+						$wrote_contents = fwrite($handle, "Ext.namespace(\"" . $namespace . "\");\n");
+						if($wrote_contents === false)	{
+							echo "Error: unable to write namespace " . $namespace . ".";
+							exit;
+						}
+						
+						$namespaces_written[$namespace] = true;
+						$delimiter = "\n\n";
 					}
-					
-					$namespaces_written[$namespace] = true;
-					$delimiter = "\n\n";
+				}
+				else	{
+					$file_contents = str_replace("%%VERSION_NUMBER%%", $in_version_number, $file_contents);
 				}
 			}
 		}
