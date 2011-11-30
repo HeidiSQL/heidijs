@@ -1,6 +1,8 @@
 (function()	{
 	//---Private Variables---//
-	var unsavedSessionName = "Unsaved Session";
+	var unsavedSessionName = "Unsaved Session",
+		dateFormat = "n/j/Y g:i:s A T",
+		connectionIdXRecord = {};
 	
 	
 	//---Create Singleton---//
@@ -9,6 +11,7 @@
 		title:"Connection Manager",
 		width:500,
 		height:300,
+		modal:true,
 		
 		layout:{
 			type:"border",
@@ -31,7 +34,7 @@
 					model:Ext.define("HeidiJSConnectionManagerConnectionModel", {
 						extend:"Ext.data.Model",
 						fields:[
-							"connection_id",
+							"id",
 							"name",
 							"hostname_ip",
 							"username",
@@ -104,7 +107,11 @@
 					
 						if(!this.store.getCount())	{
 							this.store.add({
+								id:new Date().getTime(),
 								name:unsavedSessionName,
+								create_date:Ext.Date.format(new Date(), dateFormat),
+								num_successful_connections:0,
+								num_unsuccessful_connections:0,
 								port:3306
 							});
 						}
@@ -131,6 +138,7 @@
 						iconCls:"icon-connection-manager-settings",
 						
 						defaults:{
+							anchor:"100%",
 							listeners:{
 								afterrender:function()	{
 									var connectButton = this.ownerCt.dockedItems.findBy(function(inDockedItem) { return inDockedItem.dock == "bottom"; }).items.findBy(function(inItem) { return inItem.connectButton; });
@@ -263,7 +271,6 @@
 																	name:"password",
 																	inputType:"password",
 																	anchor:"100%",
-																	allowBlank:false,
 																	listeners:{
 																		afterrender:function()	{
 																			var me = this,
@@ -310,11 +317,22 @@
 											connectToServer();
 										},
 										connectToServer = function()	{
-											var proxy = Heidi.ProxyManager.create(selectedSession.get("proxy_type"));
+											var proxyType = selectedSession.get("proxy_type"),
+												proxy = Heidi.ProxyManager.create(proxyType);
 										
 											Ext.MessageBox.wait("Please wait while connecting to the server...", "Connecting");
 											
-											proxy.establishConnection(selectedSession, function(inConnectionId)	{
+											proxy.establishConnection(selectedSession, password, function(inConnectionId)	{
+												Ext.MessageBox.hide();
+											
+												if(!inConnectionId)	{
+													Heidi.window.ConnectionManager.connectionRejected(selectedSession);
+													return false;
+												}
+												
+												Heidi.window.ConnectionManager.connectionEstablished(selectedSession, inConnectionId);
+												Heidi.window.ConnectionManager.hide();
+												Heidi.container.Viewport.addConnection(inConnectionId);
 											});
 										};
 									
@@ -368,16 +386,19 @@
 						title:"Statistics",
 						iconCls:"icon-connection-manager-statistics",
 						defaults:{
-							readOnly:true
+							readOnly:true,
+							anchor:"100%"
 						},
 						items:[
 							{
 								xtype:"textfield",
-								fieldLabel:"Created"
+								fieldLabel:"Created",
+								name:"create_date"
 							},
 							{
 								xtype:"textfield",
-								fieldLabel:"Last Connect"
+								fieldLabel:"Last Connect",
+								name:"last_connect"
 							},
 							{
 								xtype:"numberfield",
@@ -393,6 +414,20 @@
 					}
 				]
 			}
-		]
+		],
+		
+		connectionEstablished:function(inRecord, inConnectionId)	{
+			inRecord.set("last_connect", Ext.Date.format(new Date(), dateFormat));
+			inRecord.set("num_successful_connections", inRecord.get("num_successful_connections") + 1);
+			
+			connectionIdXRecord[inConnectionId] = inRecord;
+			
+			inRecord.store.sync();
+		},
+		connectionRejected:function(inRecord)	{
+			inRecord.set("num_unsuccessful_connections", inRecord.get("num_unsuccessful_connections") + 1);
+			
+			inRecord.store.sync();
+		}
 	});
 })();

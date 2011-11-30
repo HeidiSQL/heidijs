@@ -3,15 +3,23 @@ Ext.define("Heidi.data.proxy.MySQLPHP", {
 	alias:"proxy.mysqlphp",
 	
 	url:"providers/data/proxy/MySQLPHP.php",
-	establishConnection:function(inSessionRecord, inCallback)	{
+	establishConnection:function(inSessionRecord, inPassword, inCallback)	{
 		Ext.Ajax.request({
 			url:this.url,
 			params:{
-				type:"establish_connection",
-				params:Ext.encode(inSessionRecord.data)
+				flag:"establish_connection",
+				params:Ext.encode(Ext.apply(Ext.apply({}, inSessionRecord.data), {password:inPassword}))
 			},
 			success:function(inResponse)	{
-debugger;
+				var response = Ext.decode(inResponse.responseText);
+				
+				if(response.type == "error")	{
+					return Ext.MessageBox.alert("Error", response.message, function()	{
+						inCallback(false);
+					});
+				}
+				
+				inCallback(response.message);
 			}
 		});
 	},
