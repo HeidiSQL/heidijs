@@ -435,11 +435,14 @@
 			if(!record)	{
 				return false;
 			}
+			
+			var proxyType = record.get("proxy_type");
 		
 			return {
 				connectionId:inConnectionId,
 				name:record.get("name"),
-				proxyType:record.get("proxy_type")
+				proxyType:proxyType,
+				proxyConnectionTreeNodeIconCls:Heidi.ProxyManager.getConnectionTreeNodeIconClsFromProxyType(proxyType)
 			};
 		},
 		getProxyInstanceFromConnectionId:function(inConnectionId)	{

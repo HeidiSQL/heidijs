@@ -2,6 +2,8 @@ Ext.define("Heidi.data.proxy.MySQLPHP", {
 	extend:"Ext.data.proxy.Ajax",
 	alias:"proxy.mysqlphp",
 	
+	connectionTreeNodeIconCls:"icon-proxy-mysql-php-connection",
+	
 	url:"providers/data/proxy/MySQLPHP.php",
 	establishConnection:function(inSessionRecord, inPassword, inCallback)	{
 		Ext.Ajax.request({
@@ -31,11 +33,21 @@ Ext.define("Heidi.data.proxy.MySQLPHP", {
 	
 	loadConnectionChildren:function(inNode, inCallback)	{
 		//---Determine Flag---//
-		var parentId = inNode.get("parentId");
+		var parentId = inNode.get("parentId"),
+			flag = null;
+			
 		if(parentId == "root")	{ // At the host level, need to load the children
-			var flag = "load_databases";
+			flag = "load_databases";
 		}
 		else	{
+			switch(inNode.get("type"))	{
+				case "database":
+					flag = "load_tables";
+					break;
+			}
+		}
+		
+		if(flag === null)	{
 			return false;
 		}
 		
@@ -44,10 +56,17 @@ Ext.define("Heidi.data.proxy.MySQLPHP", {
 		Ext.Ajax.request({
 			url:this.url,
 			params:Ext.apply({
-				flag:flag
+				flag:flag,
+				node_id:inNode.get("id")
 			}, this.extraParams),
 			success:function(inResponse)	{
-debugger;
+				var response = Ext.decode(inResponse.responseText);
+				
+				if(response.type == "error")	{
+					return Ext.MessageBox.alert("Error", response.message);
+				}
+				
+				inCallback(response.message);
 			}
 		});
 		

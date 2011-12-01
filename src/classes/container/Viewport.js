@@ -17,7 +17,11 @@ Ext.onReady(function()	{
 			var connectionId = inOperation.node.get("connectionId"),
 				nodeProxyInstance = Heidi.window.ConnectionManager.getProxyInstanceFromConnectionId(connectionId);
 				canLoadChildren = nodeProxyInstance.loadConnectionChildren(inOperation.node, function(inChildren)	{
-debugger;
+					inOperation.records = inChildren;
+					inOperation.setCompleted(); // Needed so Ext will continue
+					inOperation.setSuccessful();
+					
+					inCallback.apply(inScope || this, [inOperation]);
 				});
 			
 			if(!canLoadChildren)	{
@@ -37,8 +41,7 @@ debugger;
 				"connectionId",
 				"type",
 				"text",
-				"iconCls",
-				"proxyType"
+				"iconCls"
 			]
 		});
 	}
@@ -145,8 +148,7 @@ debugger;
 					connectionId:connectionInformation.connectionId,
 					type:"connection",
 					text:connectionInformation.name,
-					iconCls:"icon-connections-connection",
-					proxyType:connectionInformation.proxyType
+					iconCls:connectionInformation.proxyConnectionTreeNodeIconCls
 				});
 			
 			connectionsTreePanel.store.tree.root.appendChild(connectionNode);

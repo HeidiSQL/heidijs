@@ -1,0 +1,12 @@
+/* Connection Icons */
+.icon-proxy-mysql-php-connection	{
+	background-image: url(../images/computer.png) !important;
+}
+
+.icon-proxy-mysql-php-database	{
+	background-image: url(../images/database.png) !important;
+}
+
+.icon-proxy-mysql-php-table	{
+	background-image: url(../images/table.png) !important;
+}

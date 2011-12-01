@@ -11,6 +11,9 @@
 		
 		getNames:function()	{
 			return Ext.Object.getKeys(proxies);
+		},
+		getConnectionTreeNodeIconClsFromProxyType:function(inTypeName)	{
+			return proxies[inTypeName].prototype.connectionTreeNodeIconCls;
 		}
 	};
 })();
