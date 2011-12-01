@@ -1,0 +1,16 @@
+/*---Icons---*/
+.icon-tab-host	{
+	background-image: url(../images/computer.png);
+}
+
+.icon-tab-database	{
+	background-image: url(../images/database.png);
+}
+
+.icon-tab-table	{
+	background-image: url(../images/table.png);
+}
+
+.icon-tab-query	{
+	background-image: url(../images/page_white_database.png);
+}

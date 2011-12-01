@@ -5,6 +5,17 @@
 		connectionIdXRecord = {};
 	
 	
+	//---Private Functions---//
+	function createProxyInstanceFromConnectionId(inConnectionId)	{
+		var record = connectionIdXRecord[inConnectionId];
+		if(!record)	{
+			return false;
+		}
+		
+		return proxyInstance = Heidi.ProxyManager.create(record.get("proxy_type"));
+	};
+	
+	
 	//---Create Singleton---//
 	Heidi.window.ConnectionManager = Ext.create("Ext.window.Window", {
 		iconCls:"icon-connection-manager",
@@ -446,15 +457,21 @@
 			};
 		},
 		getProxyInstanceFromConnectionId:function(inConnectionId)	{
-			var record = connectionIdXRecord[inConnectionId];
-			if(!record)	{
+			var proxyInstance = createProxyInstanceFromConnectionId(inConnectionId);
+			if(!proxyInstance)	{
 				return false;
 			}
-			
-			var proxyInstance = Heidi.ProxyManager.create(record.get("proxy_type"));
 			proxyInstance.bindToConnection(inConnectionId);
 			
 			return proxyInstance;
+		},
+		getCompatibleTabsNamesFromConnectionId:function(inConnectionId)	{
+			var proxyInstance = createProxyInstanceFromConnectionId(inConnectionId);
+			if(!proxyInstance)	{
+				return false;
+			}
+			
+			return proxyInstance.getCompatibleTabNamesFromNodeType("ALL");
 		}
 	});
 })();

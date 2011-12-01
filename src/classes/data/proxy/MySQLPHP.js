@@ -71,6 +71,44 @@ Ext.define("Heidi.data.proxy.MySQLPHP", {
 		});
 		
 		return true;
+	},
+	getCompatibleTabNamesFromNodeType:function(inNodeType)	{
+		//---Variables---//
+		var nodeTypeXCompatibleTabs = {
+				connection:[
+					"Host"
+				],
+				database:[
+					"Database"
+				],
+				table:[
+					"Table"
+				]
+			},
+			compatibleTabs = [];
+		
+		
+		//---Determine Compatible Tabs---//
+		if(inNodeType == "ALL")	{
+			Ext.Object.each(nodeTypeXCompatibleTabs, function(inNodeType, inCompatibleTabs)	{
+				compatibleTabs.push.apply(compatibleTabs, inCompatibleTabs);
+			});
+		}
+		else	{
+			compatibleTabs.push.apply(compatibleTabs, nodeTypeXCompatibleTabs.connection);
+			
+			if(inNodeType == "table")	{
+				compatibleTabs.push.apply(compatibleTabs, nodeTypeXCompatibleTabs.database);
+			}
+			
+			if(inNodeType != "database")	{
+				compatibleTabs.push.apply(compatibleTabs, nodeTypeXCompatibleTabs[inNodeType]);
+			}
+		}
+		
+		compatibleTabs.push("Query");
+		
+		return compatibleTabs;
 	}
 });
 

@@ -57,7 +57,19 @@ Ext.onReady(function()	{
 		},
 		useArrows:true,
 		rootVisible:false,
-		singleExpand:true
+		singleExpand:true,
+		listeners:{
+			itemclick:function(inView, inRecord)	{
+debugger;
+			}
+		}
+	});
+	
+	
+	//---Connection Tab Panel---//
+	var connectionTabPanel = Ext.create("Ext.tab.Panel", {
+		region:"center",
+		padding:CENTER_BORDER_LAYOUT_PADDING
 	});
 
 
@@ -94,18 +106,7 @@ Ext.onReady(function()	{
 						},
 						items:[
 							connectionsTreePanel,
-							{
-								xtype:"tabpanel",
-								region:"center",
-								padding:CENTER_BORDER_LAYOUT_PADDING,
-								items:[
-									{
-										xtype:"panel",
-										title:"Host",
-										html:"host"
-									}
-								]
-							}
+							connectionTabPanel
 						]
 					},
 					{
@@ -143,13 +144,32 @@ Ext.onReady(function()	{
 		
 		addConnection:function(inConnectionId)	{
 			var connectionInformation = Heidi.window.ConnectionManager.getConnectionInformation(inConnectionId),
+				connectionId = connectionInformation.connectionId,
 				connectionNode = Ext.create(CONNECTIONS_TREE_PANEL_MODEL_NAME, {
-					id:connectionInformation.connectionId,
-					connectionId:connectionInformation.connectionId,
+					id:connectionId,
+					connectionId:connectionId,
 					type:"connection",
 					text:connectionInformation.name,
 					iconCls:connectionInformation.proxyConnectionTreeNodeIconCls
+				}),
+				compatibleTabNames = Heidi.window.ConnectionManager.getCompatibleTabsNamesFromConnectionId(connectionId);
+			
+			
+			//---Add Missing Compatible Tabs---//
+			Ext.Array.each(compatibleTabNames, function(inCompatibleTabName)	{
+				if(connectionTabPanel.items.findBy(function(inTab) { return inTab.tabName == inCompatibleTabName; }))	{ // This tab has already been added by another connection
+					return true;
+				}
+				
+				var compatibleTab = Ext.create("Heidi.tab." + inCompatibleTabName, {
+					tabName:inCompatibleTabName
 				});
+				connectionTabPanel.add(compatibleTab);
+			});
+			
+			
+			//---Only Show Compatible Tabs---//
+debugger;
 			
 			connectionsTreePanel.store.tree.root.appendChild(connectionNode);
 			connectionNode.expand();
