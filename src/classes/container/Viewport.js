@@ -60,7 +60,7 @@ Ext.onReady(function()	{
 		singleExpand:true,
 		listeners:{
 			itemclick:function(inView, inRecord)	{
-debugger;
+				connectionTabPanel.syncTabsWithTreeNode(inRecord);
 			}
 		}
 	});
@@ -69,7 +69,23 @@ debugger;
 	//---Connection Tab Panel---//
 	var connectionTabPanel = Ext.create("Ext.tab.Panel", {
 		region:"center",
-		padding:CENTER_BORDER_LAYOUT_PADDING
+		padding:CENTER_BORDER_LAYOUT_PADDING,
+		
+		syncTabsWithTreeNode:function(inTreeNode)	{
+			var compatibleTabNames = Heidi.window.ConnectionManager.getCompatibleTabsFromTreeNode(inTreeNode);
+			
+			this.items.each(function(inTab)	{
+				var isCompatible = inTab.isCompatible(compatibleTabNames);
+				
+				if(isCompatible)	{
+					inTab.tab.show();
+					inTab.syncWithTreeNode(inTreeNode);
+				}
+				else	{
+					inTab.tab.hide();
+				}
+			});
+		}
 	});
 
 
@@ -152,27 +168,31 @@ debugger;
 					text:connectionInformation.name,
 					iconCls:connectionInformation.proxyConnectionTreeNodeIconCls
 				}),
-				compatibleTabNames = Heidi.window.ConnectionManager.getCompatibleTabsNamesFromConnectionId(connectionId);
+				allCompatibleTabNames = Heidi.window.ConnectionManager.getAllCompatibleTabsNamesFromConnectionId(connectionId);
 			
 			
 			//---Add Missing Compatible Tabs---//
-			Ext.Array.each(compatibleTabNames, function(inCompatibleTabName)	{
+			Ext.Array.each(allCompatibleTabNames, function(inCompatibleTabName)	{
 				if(connectionTabPanel.items.findBy(function(inTab) { return inTab.tabName == inCompatibleTabName; }))	{ // This tab has already been added by another connection
 					return true;
 				}
 				
 				var compatibleTab = Ext.create("Heidi.tab." + inCompatibleTabName, {
-					tabName:inCompatibleTabName
+					tabName:inCompatibleTabName,
+					hidden:true,
+					
+					isCompatible:function(inTabNames)	{
+						return (inTabNames.indexOf(inCompatibleTabName) != -1);
+					}
 				});
 				connectionTabPanel.add(compatibleTab);
 			});
 			
 			
 			//---Only Show Compatible Tabs---//
-debugger;
-			
 			connectionsTreePanel.store.tree.root.appendChild(connectionNode);
 			connectionNode.expand();
+			connectionTabPanel.syncTabsWithTreeNode(connectionNode);
 		}
 	});
 });

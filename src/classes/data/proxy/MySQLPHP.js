@@ -97,12 +97,12 @@ Ext.define("Heidi.data.proxy.MySQLPHP", {
 		else	{
 			compatibleTabs.push.apply(compatibleTabs, nodeTypeXCompatibleTabs.connection);
 			
-			if(inNodeType == "table")	{
+			if(inNodeType != "connection")	{
 				compatibleTabs.push.apply(compatibleTabs, nodeTypeXCompatibleTabs.database);
-			}
-			
-			if(inNodeType != "database")	{
-				compatibleTabs.push.apply(compatibleTabs, nodeTypeXCompatibleTabs[inNodeType]);
+				
+				if(inNodeType != "database")	{
+					compatibleTabs.push.apply(compatibleTabs, nodeTypeXCompatibleTabs[inNodeType]);
+				}
 			}
 		}
 		

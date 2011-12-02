@@ -2,17 +2,23 @@
 	//---Private Variables---//
 	var unsavedSessionName = "Unsaved Session",
 		dateFormat = "n/j/Y g:i:s A T",
-		connectionIdXRecord = {};
+		connectionIdXRecord = {},
+		connectionIdXProxyInstance = {};
 	
 	
 	//---Private Functions---//
-	function createProxyInstanceFromConnectionId(inConnectionId)	{
-		var record = connectionIdXRecord[inConnectionId];
-		if(!record)	{
-			return false;
+	function getProxyInstanceFromConnectionId(inConnectionId)	{
+		var proxyInstance = connectionIdXProxyInstance[inConnectionId];
+		if(!proxyInstance)	{
+			var record = connectionIdXRecord[inConnectionId];
+			if(!record)	{
+				return false;
+			}
+			
+			proxyInstance = connectionIdXProxyInstance[proxyInstance] = Heidi.ProxyManager.create(record.get("proxy_type"));
 		}
 		
-		return proxyInstance = Heidi.ProxyManager.create(record.get("proxy_type"));
+		return proxyInstance;
 	};
 	
 	
@@ -457,7 +463,7 @@
 			};
 		},
 		getProxyInstanceFromConnectionId:function(inConnectionId)	{
-			var proxyInstance = createProxyInstanceFromConnectionId(inConnectionId);
+			var proxyInstance = getProxyInstanceFromConnectionId(inConnectionId);
 			if(!proxyInstance)	{
 				return false;
 			}
@@ -465,13 +471,21 @@
 			
 			return proxyInstance;
 		},
-		getCompatibleTabsNamesFromConnectionId:function(inConnectionId)	{
-			var proxyInstance = createProxyInstanceFromConnectionId(inConnectionId);
+		getAllCompatibleTabsNamesFromConnectionId:function(inConnectionId)	{
+			var proxyInstance = getProxyInstanceFromConnectionId(inConnectionId);
 			if(!proxyInstance)	{
 				return false;
 			}
 			
 			return proxyInstance.getCompatibleTabNamesFromNodeType("ALL");
+		},
+		getCompatibleTabsFromTreeNode:function(inTreeNode)	{
+			var proxyInstance = getProxyInstanceFromConnectionId(inTreeNode.get("connectionId"));
+			if(!proxyInstance)	{
+				return false;
+			}
+			
+			return proxyInstance.getCompatibleTabNamesFromNodeType(inTreeNode.get("type"));
 		}
 	});
 })();
