@@ -22,3 +22,7 @@
 .viewport-status-panel-item-status	{
 	color: #888;
 }
+
+.viewport-status-panel-item-error	{
+	color: #800;
+}

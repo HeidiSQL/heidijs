@@ -122,6 +122,22 @@ switch($_REQUEST["flag"])	{
 		
 		$response = $return_array;
 		break;
+	case "load_connection_variables";
+		$return_array = array();
+	
+		list($records, $total) = run_query_and_get_records($connection, "SHOW VARIABLES", true);
+		foreach($records as $record)	{
+			$return_array[] = array(
+				"variable"=>$record["Variable_name"],
+				"value"=>$record["Value"]
+			);
+		}
+		
+		$response = array("rows"=>$return_array, "total"=>$total);
+		break;
+	default:
+		display_response(false, "Unknown action (" . $_REQUEST["flag"] . ") to perform. Please contact your system administrator.");
+		break;
 }
 
 display_response(true, $response);
@@ -145,9 +161,14 @@ function display_response($in_success, $in_message)	{
 	exit;
 }
 
-function run_query_and_get_records(&$in_connection, $in_query, $in_start=0, $in_limit=0)	{
+function run_query_and_get_records(&$in_connection, $in_query, $in_paging=false)	{
 	//---Update Status---//
 	append_status_message($in_query, "query");
+	
+	
+	//---Variables---//
+	$start = (array_key_exists("start", $_REQUEST) ? $_REQUEST["start"] : 0);
+	$limit = (array_key_exists("limit", $_REQUEST) ? $_REQUEST["limit"] : 0);
 	
 	
 	//---Run Query---//
@@ -158,8 +179,8 @@ function run_query_and_get_records(&$in_connection, $in_query, $in_start=0, $in_
 	
 	
 	//---Data Seek---//
-	if($in_start)	{
-		mysql_data_seek($results, $in_start);
+	if($start)	{
+		mysql_data_seek($results, $start);
 	}
 
 
@@ -171,12 +192,12 @@ function run_query_and_get_records(&$in_connection, $in_query, $in_start=0, $in_
 		$return_array[] = $record;
 		
 		$count++;
-		if($count == $in_limit)	{
+		if($count == $limit)	{
 			break;
 		}
 	}
 	
-	return $return_array;
+	return (!$in_paging ? $return_array : array($return_array, mysql_num_rows($results)));
 }
 
 function append_status_message($in_message, $in_type="query")	{

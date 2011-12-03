@@ -7,7 +7,7 @@
 	function issueRequest(inOptions)	{
 		//---Variables---//
 		var body = Ext.getBody(),
-			url = inOptions.url,
+			url = inOptions.url || "providers/data/proxy/MySQLPHP.php",
 			params = inOptions.params,
 			callback = inOptions.callback;
 			
@@ -88,10 +88,8 @@
 		
 		connectionTreeNodeIconCls:"icon-proxy-mysql-php-connection",
 		
-		url:"providers/data/proxy/MySQLPHP.php",
 		establishConnection:function(inSessionRecord, inPassword, inCallback)	{
 			this.issueRequest({
-				url:this.url,
 				params:{
 					flag:"establish_connection",
 					params:Ext.encode(Ext.apply(Ext.apply({}, inSessionRecord.data), {password:inPassword}))
@@ -128,7 +126,6 @@
 			
 			//---Make Request---//
 			this.issueRequest({
-				url:this.url,
 				params:{
 					flag:flag,
 					node_id:inNode.get("id")
@@ -185,24 +182,37 @@
 		
 		
 		//---Class Specific Functions---//
-		loadConnectionDatabasesInformation:function(inCallback)	{
+		loadConnectionDatabasesInformation:function()	{
+			this.issueRequestWithFlagFromCallee("load_databases_information");
+		},
+		loadConnectionVariablesInformation:function(inCallback)	{
+			this.issueRequestWithFlagFromCallee("load_connection_variables");
+		},
+		
+		
+		//---Private Functions---//
+		issueRequestWithFlagFromCallee:function(inFlag)	{
+			var callerArguments = arguments.callee.caller.arguments,
+				callback = callerArguments[0],
+				start = callerArguments[1] || 0,
+				limit = callerArguments[2] || 50;
+		
 			this.issueRequest({
-				url:this.url,
 				params:{
-					flag:"load_databases_information"
+					flag:inFlag,
+					start:start,
+					limit:limit
 				},
 				callback:function(inResponse)	{
 					if(!inResponse)	{
 						return false;
 					}
 					
-					inCallback(inResponse);
+					callback(inResponse);
 				}
 			});
 		},
 		
-		
-		//---Private Functions---//
 		issueRequest:function(inOptions)	{
 			var options = Ext.apply({}, inOptions);
 			options.params = Ext.apply(Ext.apply({}, this.extraParams), options.params);

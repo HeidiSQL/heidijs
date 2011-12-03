@@ -20,3 +20,7 @@
 .icon-tab-host-databases {
 	background-image: url(../images/database.png);
 }
+
+.icon-tab-host-variables	{
+	background-image: url(../images/cog.png);
+}

@@ -10,7 +10,8 @@ Ext.define("Heidi.tab.Host", {
 	
 	
 		//---Constants---//
-		var HOST_DATABASES_GRID_MODEL_NAME = "HostDatabasesGridModelName";
+		var HOST_DATABASES_GRID_MODEL_NAME = "HostDatabasesGridModelName",
+			HOST_VARIABLES_GRID_MODEL_NAME = "HostVariablesGridModelName";
 		
 	
 		//---Add Databases Grid---//
@@ -96,20 +97,63 @@ Ext.define("Heidi.tab.Host", {
 			],
 			forceFit:true,
 			
-			syncWithProxyInstance:function(inProxyInstance)	{
-				//---Variables---//
-				var me = this;
+			proxyInstanceMethodName:"loadConnectionDatabasesInformation"
+		});
+		
+		
+		//---Add Variables Grid---//
+		if(!Ext.ModelManager.getModel(HOST_VARIABLES_GRID_MODEL_NAME))	{
+			Ext.define(HOST_VARIABLES_GRID_MODEL_NAME, {
+				extend:"Ext.data.Model",
 				
-				
-				//---Load Store---//
-				me.store.removeAll();
-				me.el.mask("Loading...");
-				
-				inProxyInstance.loadConnectionDatabasesInformation(function(inRecords)	{
-					me.store.loadData(inRecords);
-					me.el.unmask();
-				});
-			}
+				fields:[
+					"variable",
+					"value"
+				]
+			});
+		}
+		
+		var variablesGridStore = Ext.create("Ext.data.Store", {
+			proxy:{
+				type:"memory",
+				reader:{
+					type:"json"
+				}
+			},
+			model:HOST_VARIABLES_GRID_MODEL_NAME,
+			pageSize:50
+		});
+		
+		this.add({
+			xtype:"gridpanel",
+			
+			title:"Variables",
+			iconCls:"icon-tab-host-variables",
+			
+			store:variablesGridStore,
+			columns:[
+				{
+					text:"Variable",
+					dataIndex:"variable",
+					width:250
+				},
+				{
+					text:"Value",
+					dataIndex:"value",
+					flex:1
+				}
+			],
+			forceFit:true,
+			dockedItems:[
+				{
+					xtype:"pagingtoolbar",
+					dock:"bottom",
+					store:variablesGridStore,
+					displayInfo:true
+				}
+			],
+			
+			proxyInstanceMethodName:"loadConnectionVariablesInformation"
 		});
 		
 		
@@ -123,6 +167,45 @@ Ext.define("Heidi.tab.Host", {
 	syncWithTreeNode:function(inTreeNode)	{
 		//---Variables---//
 		var proxyInstance = inTreeNode.get("proxyInstance");
+		
+		
+		//---Functions---//
+		function syncTabWithProxyInstance(inChildTab)	{
+			//---Check Chilld Tab Override---//
+			if(inChildTab.syncWithProxyInstance)	{
+				return inChildTab.syncWithProxyInstance(proxyInstance);
+			}
+		
+		
+			//---Load Store---//
+			function loadChildTabStore(inRecords)	{
+				inChildTab.store.loadData(inRecords.rows || inRecords);
+				
+				if(inRecords.total)	{
+					inChildTab.store.totalCount = inRecords.total;
+					inChildTab.dockedItems.findBy(function(inDockedItem) { return inDockedItem.xtype == "pagingtoolbar"; }).onLoad();
+				}
+				
+				inChildTab.el.unmask();
+			}
+			
+			inChildTab.store.removeAll();
+			inChildTab.el.mask("Loading...");
+			
+			var proxyLoadMethod = Ext.bind(proxyInstance[inChildTab.proxyInstanceMethodName], proxyInstance);
+			proxyLoadMethod(loadChildTabStore);
+			
+			inChildTab.store.proxy.read = function(inOperation, inCallback, inScope)	{ // Often called when paging is attempted
+				proxyLoadMethod(function()	{
+					//---Load Store---//
+					loadChildTabStore.apply(this, arguments);
+					
+					
+					//---Finish Operation---//
+					inCallback.apply(inScope || this, [inOperation]);
+				}, inOperation.start, inOperation.limit);
+			};
+		}
 	
 	
 		//---Configure Tab---//
@@ -133,11 +216,11 @@ Ext.define("Heidi.tab.Host", {
 		//---Configure Child Tabs---//
 		this.items.each(function(inChildTab, inIndex)	{
 			if(inIndex == 0)	{
-				inChildTab.syncWithProxyInstance(proxyInstance);
+				syncTabWithProxyInstance(inChildTab);
 			}
 			else	{
 				inChildTab.addListener("activate", function()	{
-					childTabSync(inChildTab);
+					syncTabWithProxyInstance(inChildTab);
 				}, inChildTab, {single:true});
 			}
 		});
