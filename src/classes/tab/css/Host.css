@@ -1,4 +1,4 @@
-/*---Icons---*/
+/*---Top Level Tab Icons---*/
 .icon-tab-host	{
 	background-image: url(../images/computer.png);
 }
@@ -13,4 +13,10 @@
 
 .icon-tab-query	{
 	background-image: url(../images/page_white_database.png);
+}
+
+
+/*---Host Tab Icons---*/
+.icon-tab-host-databases {
+	background-image: url(../images/database.png);
 }

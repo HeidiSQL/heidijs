@@ -1,4 +1,24 @@
-/* Panel Icons */
+/*---Panel Icons---*/
 .icon-viewport-heidi-js	{
 	background-image: url(../images/icon_heidi_js.png);
+}
+
+
+/*---Status Messages---*/
+.viewport-status-panel-list {
+	list-style-type: decimal;
+	background-color: #888;
+}
+
+.viewport-status-panel-list li	{
+	list-style-type: inherit;
+	background-color: #FFF;
+	border-left: 2px solid #444;
+	padding-left: 5px;
+}
+
+
+/*---Status Message Types---*/
+.viewport-status-panel-item-status	{
+	color: #888;
 }

@@ -5,6 +5,6 @@ Ext.define("Heidi.tab.Query", {
 	iconCls:"icon-tab-query",
 	
 	syncWithTreeNode:function(inTreeNode)	{
-debugger;
+		this.proxyInstance = inTreeNode.get("proxyInstance");
 	}
 });
