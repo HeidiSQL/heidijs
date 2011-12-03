@@ -11,7 +11,8 @@ Ext.define("Heidi.tab.Host", {
 	
 		//---Constants---//
 		var HOST_DATABASES_GRID_MODEL_NAME = "HostDatabasesGridModelName",
-			HOST_VARIABLES_GRID_MODEL_NAME = "HostVariablesGridModelName";
+			HOST_VARIABLES_GRID_MODEL_NAME = "HostVariablesGridModelName",
+			HOST_STATUS_GRID_MODEL_NAME = "HostStatusGridModelName";
 		
 	
 		//---Add Databases Grid---//
@@ -154,6 +155,73 @@ Ext.define("Heidi.tab.Host", {
 			],
 			
 			proxyInstanceMethodName:"loadConnectionVariablesInformation"
+		});
+		
+		
+		//---Create Status Grid---//
+		if(!Ext.ModelManager.getModel(HOST_STATUS_GRID_MODEL_NAME))	{
+			Ext.define(HOST_STATUS_GRID_MODEL_NAME, {
+				extend:"Ext.data.Model",
+				fields:[
+					"variable",
+					"value",
+					"avg_per_hour",
+					"avg_per_second"
+				]
+			});
+		}
+		
+		var statusGridStore = Ext.create("Ext.data.Store", {
+			proxy:{
+				type:"memory",
+				reader:{
+					type:"json"
+				}
+			},
+			model:HOST_STATUS_GRID_MODEL_NAME,
+			pageSize:50
+		});
+		
+		this.add({
+			xtype:"gridpanel",
+			
+			title:"Status",
+			iconCls:"icon-tab-host-status",
+			
+			store:statusGridStore,
+			columns:[
+				{
+					text:"Variable",
+					dataIndex:"variable",
+					flex:1
+				},
+				{
+					text:"Value",
+					dataIndex:"value",
+					width:75
+				},
+				{
+					text:"Avg. Per Hour",
+					dataIndex:"avg_per_hour",
+					width:100
+				},
+				{
+					text:"Avg. Per Second",
+					dataIndex:"avg_per_second",
+					width:125
+				}
+			],
+			forceFit:true,
+			dockedItems:[
+				{
+					xtype:"pagingtoolbar",
+					dock:"bottom",
+					store:statusGridStore,
+					displayInfo:true
+				}
+			],
+			
+			proxyInstanceMethodName:"loadConnectionStatusGridInformation"
 		});
 		
 		

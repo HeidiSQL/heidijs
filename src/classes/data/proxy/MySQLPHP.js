@@ -185,8 +185,11 @@
 		loadConnectionDatabasesInformation:function()	{
 			this.issueRequestWithFlagFromCallee("load_databases_information");
 		},
-		loadConnectionVariablesInformation:function(inCallback)	{
+		loadConnectionVariablesInformation:function()	{
 			this.issueRequestWithFlagFromCallee("load_connection_variables");
+		},
+		loadConnectionStatusGridInformation:function()	{
+			this.issueRequestWithFlagFromCallee("load_connection_status_grid");
 		},
 		
 		

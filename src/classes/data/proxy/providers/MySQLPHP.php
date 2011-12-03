@@ -135,6 +135,21 @@ switch($_REQUEST["flag"])	{
 		
 		$response = array("rows"=>$return_array, "total"=>$total);
 		break;
+	case "load_connection_status_grid":
+		$return_array = array();
+	
+		list($records, $total) = run_query_and_get_records($connection, "SHOW STATUS", true);
+		foreach($records as $record)	{
+			$return_array[] = array(
+				"variable"=>$record["Variable_name"],
+				"value"=>$record["Value"],
+				"avg_per_hour"=>0,
+				"avg_per_second"=>0
+			);
+		}
+		
+		$response = array("rows"=>$return_array, "total"=>$total);
+		break;
 	default:
 		display_response(false, "Unknown action (" . $_REQUEST["flag"] . ") to perform. Please contact your system administrator.");
 		break;
