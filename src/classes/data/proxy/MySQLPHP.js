@@ -191,6 +191,9 @@
 		loadConnectionStatusGridInformation:function()	{
 			this.issueRequestWithFlagFromCallee("load_connection_status_grid");
 		},
+		loadConnectionProcessListInformation:function()	{
+			this.issueRequestWithFlagFromCallee("load_connection_process_list_information");
+		},
 		
 		
 		//---Private Functions---//

@@ -150,6 +150,25 @@ switch($_REQUEST["flag"])	{
 		
 		$response = array("rows"=>$return_array, "total"=>$total);
 		break;
+	case "load_connection_process_list_information":
+		$return_array = array();
+		
+		$records = run_query_and_get_records($connection, "SELECT * FROM information_schema.PROCESSLIST");
+		foreach($records as $record)	{
+			$return_array[] = array(
+				"id"=>$record["ID"],
+				"user"=>$record["USER"],
+				"host"=>$record["HOST"],
+				"db"=>$record["DB"],
+				"command"=>$record["COMMAND"],
+				"time"=>$record["TIME"],
+				"state"=>$record["STATE"],
+				"info"=>$record["INFO"]
+			);
+		}
+		
+		$response = $return_array;
+		break;
 	default:
 		display_response(false, "Unknown action (" . $_REQUEST["flag"] . ") to perform. Please contact your system administrator.");
 		break;

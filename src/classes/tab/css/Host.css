@@ -3,18 +3,6 @@
 	background-image: url(../images/computer.png);
 }
 
-.icon-tab-database	{
-	background-image: url(../images/database.png);
-}
-
-.icon-tab-table	{
-	background-image: url(../images/table.png);
-}
-
-.icon-tab-query	{
-	background-image: url(../images/page_white_database.png);
-}
-
 
 /*---Host Tab Icons---*/
 .icon-tab-host-databases {
@@ -27,4 +15,8 @@
 
 .icon-tab-host-status	{
 	background-image: url(../images/lightning.png);
+}
+
+.icon-tab-host-process-list	{
+	background-image: url(../images/page_white_database.png);
 }

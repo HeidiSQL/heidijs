@@ -12,7 +12,8 @@ Ext.define("Heidi.tab.Host", {
 		//---Constants---//
 		var HOST_DATABASES_GRID_MODEL_NAME = "HostDatabasesGridModelName",
 			HOST_VARIABLES_GRID_MODEL_NAME = "HostVariablesGridModelName",
-			HOST_STATUS_GRID_MODEL_NAME = "HostStatusGridModelName";
+			HOST_STATUS_GRID_MODEL_NAME = "HostStatusGridModelName",
+			HOST_PROCESS_LIST_GRID_MODEL_NAME = "HostProcessListGridModelName";
 		
 	
 		//---Add Databases Grid---//
@@ -222,6 +223,86 @@ Ext.define("Heidi.tab.Host", {
 			],
 			
 			proxyInstanceMethodName:"loadConnectionStatusGridInformation"
+		});
+		
+		
+		//---Create Process List Grid---//
+		if(!Ext.ModelManager.getModel(HOST_PROCESS_LIST_GRID_MODEL_NAME))	{
+			Ext.define(HOST_PROCESS_LIST_GRID_MODEL_NAME, {
+				extend:"Ext.data.Model",
+				fields:[
+					"id",
+					"user",
+					"host",
+					"db",
+					"command",
+					"time",
+					"state",
+					"info"
+				]
+			});
+		}
+		
+		this.add({
+			xtype:"gridpanel",
+			
+			title:"Process List",
+			iconCls:"icon-tab-host-process-list",
+			
+			store:{
+				proxy:{
+					type:"memory",
+					reader:{
+						type:"json"
+					}
+				},
+				model:HOST_PROCESS_LIST_GRID_MODEL_NAME
+			},
+			columns:[
+				{
+					text:"ID",
+					dataIndex:"id",
+					width:4
+				},
+				{
+					text:"User",
+					dataIndex:"user",
+					width:6
+				},
+				{
+					text:"Host",
+					dataIndex:"host",
+					width:12
+				},
+				{
+					text:"DB",
+					dataIndex:"db",
+					width:14
+				},
+				{
+					text:"Command",
+					dataIndex:"command",
+					width:8
+				},
+				{
+					text:"Time",
+					dataIndex:"time",
+					width:8
+				},
+				{
+					text:"State",
+					dataIndex:"state",
+					width:8
+				},
+				{
+					text:"Info",
+					dataIndex:"info",
+					width:30
+				}
+			],
+			forceFit:true,
+			
+			proxyInstanceMethodName:"loadConnectionProcessListInformation"
 		});
 		
 		
