@@ -20,3 +20,13 @@
 .icon-tab-host-process-list	{
 	background-image: url(../images/page_white_database.png);
 }
+
+.icon-tab-host-command-statistics	{
+	background-image: url(../images/chart_bar.png);
+}
+
+
+/*---Command Statistics Classes---*/
+.tab-host-command-statistics-percentage	{
+	background-color: #0D0;
+}

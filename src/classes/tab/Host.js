@@ -13,7 +13,8 @@ Ext.define("Heidi.tab.Host", {
 		var HOST_DATABASES_GRID_MODEL_NAME = "HostDatabasesGridModelName",
 			HOST_VARIABLES_GRID_MODEL_NAME = "HostVariablesGridModelName",
 			HOST_STATUS_GRID_MODEL_NAME = "HostStatusGridModelName",
-			HOST_PROCESS_LIST_GRID_MODEL_NAME = "HostProcessListGridModelName";
+			HOST_PROCESS_LIST_GRID_MODEL_NAME = "HostProcessListGridModelName",
+			HOST_COMMAND_STATISTICS_GRID_MODEL_NAME = "HostCommandStatisticsGridModelName";
 		
 	
 		//---Add Databases Grid---//
@@ -306,6 +307,103 @@ Ext.define("Heidi.tab.Host", {
 		});
 		
 		
+		//---Create Command Statistics Tab---//
+		if(!Ext.ModelManager.getModel(HOST_COMMAND_STATISTICS_GRID_MODEL_NAME))	{
+			Ext.define(HOST_COMMAND_STATISTICS_GRID_MODEL_NAME, {
+				extend:"Ext.data.Model",
+				fields:[
+					"command_type",
+					{
+						name:"total_count",
+						type:"int"
+					},
+					"avg_per_hour",
+					"avg_per_second",
+					{
+						name:"percentage",
+						type:"float"
+					}
+				]
+			});
+		}
+		
+		var commandStatisticsStore = Ext.create("Ext.data.Store", {
+			proxy:{
+				type:"memory",
+				reader:{
+					type:"json"
+				}
+			},
+			model:HOST_COMMAND_STATISTICS_GRID_MODEL_NAME,
+			sorters:[
+				{
+					property:"total_count",
+					direction:"DESC"
+				}
+			],
+			pageSize:50
+		});
+		
+		this.add({
+			xtype:"gridpanel",
+			
+			title:"Command Statistics",
+			iconCls:"icon-tab-host-command-statistics",
+			
+			store:commandStatisticsStore,
+			columns:[
+				{
+					text:"Command Type",
+					dataIndex:"command_type"
+				},
+				{
+					text:"Total Count",
+					dataIndex:"total_count"
+				},
+				{
+					text:"Avg. per Hour",
+					dataIndex:"avg_per_hour"
+				},
+				{
+					text:"Avg. per Second",
+					dataIndex:"avg_per_second"
+				},
+				{
+					text:"Percentage",
+					dataIndex:"percentage",
+					renderer:function(inValue)	{
+						var value = (inValue + ""),
+							indexOfDecimal = value.indexOf(".");
+						
+						if(indexOfDecimal == -1)	{
+							value += ".00";
+						}
+						else if(value.length - indexOfDecimal == 2)	{
+							value += "0";
+						}
+						else	{
+							value = value.substring(0, indexOfDecimal + 3);
+						}
+					
+						return "<div class='tab-host-command-statistics-percentage' style='width: " + inValue + "%'>" + value + "%</div>";
+					}
+				}
+			],
+			forceFit:true,
+			dockedItems:[
+				{
+					xtype:"pagingtoolbar",
+					dock:"bottom",
+					store:commandStatisticsStore,
+					displayInfo:true
+				}
+			],
+			
+			proxyInstanceMethodName:"loadConnectionCommandStatisticsGrid",
+			includeSorters:true
+		});
+		
+		
 		//---Finalize Tab Panel---//
 		this.setActiveTab(0);
 	},
@@ -341,7 +439,24 @@ Ext.define("Heidi.tab.Host", {
 			inChildTab.store.removeAll();
 			inChildTab.el.mask("Loading...");
 			
-			var proxyLoadMethod = Ext.bind(proxyInstance[inChildTab.proxyInstanceMethodName], proxyInstance);
+			function proxyLoadMethod(inCallback, inOptions)	{
+				inOptions = Ext.apply({
+					start:0,
+					limit:50,
+					sorters:[]
+				}, inOptions || {});
+				
+				if(inChildTab.includeSorters)	{
+					inChildTab.store.sorters.each(function(inSorter)	{
+						inOptions.sorters.push({
+							field:inSorter.property,
+							direction:inSorter.direction
+						});
+					});
+				}
+			
+				proxyInstance[inChildTab.proxyInstanceMethodName](inCallback, inOptions);
+			}
 			proxyLoadMethod(loadChildTabStore);
 			
 			inChildTab.store.proxy.read = function(inOperation, inCallback, inScope)	{ // Often called when paging is attempted
@@ -352,7 +467,10 @@ Ext.define("Heidi.tab.Host", {
 					
 					//---Finish Operation---//
 					inCallback.apply(inScope || this, [inOperation]);
-				}, inOperation.start, inOperation.limit);
+				}, {
+					start:inOperation.start,
+					limit:inOperation.limit
+				});
 			};
 		}
 	

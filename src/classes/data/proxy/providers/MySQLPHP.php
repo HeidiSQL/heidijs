@@ -74,7 +74,7 @@ switch($_REQUEST["flag"])	{
 	case "load_databases":
 		$return_array = array();
 	
-		$records = run_query_and_get_records($connection, "SHOW DATABASES");
+		$records = run_query_and_get_records($connection, "SHOW DATABASES;");
 		foreach($records as $record)	{
 			$database_name = $record["Database"];
 		
@@ -92,7 +92,7 @@ switch($_REQUEST["flag"])	{
 	case "load_tables":
 		$return_array = array();
 		
-		$records = run_query_and_get_records($connection, "SHOW TABLES FROM " . $_REQUEST["node_id"]);
+		$records = run_query_and_get_records($connection, "SHOW TABLES FROM " . $_REQUEST["node_id"] . ";");
 		foreach($records as $record)	{
 			$table_name = $record["Tables_in_" . $_REQUEST["node_id"]];
 			
@@ -112,7 +112,7 @@ switch($_REQUEST["flag"])	{
 	case "load_databases_information":
 		$return_array = array();
 		
-		$records = run_query_and_get_records($connection, "SELECT * FROM information_schema.SCHEMATA");
+		$records = run_query_and_get_records($connection, "SELECT * FROM information_schema.SCHEMATA;");
 		foreach($records as $record)	{
 			$return_array[] = array(
 				"databaseName"=>$record["SCHEMA_NAME"],
@@ -125,7 +125,7 @@ switch($_REQUEST["flag"])	{
 	case "load_connection_variables";
 		$return_array = array();
 	
-		list($records, $total) = run_query_and_get_records($connection, "SHOW VARIABLES", true);
+		list($records, $total) = run_query_and_get_records($connection, "SHOW VARIABLES;", true);
 		foreach($records as $record)	{
 			$return_array[] = array(
 				"variable"=>$record["Variable_name"],
@@ -138,7 +138,7 @@ switch($_REQUEST["flag"])	{
 	case "load_connection_status_grid":
 		$return_array = array();
 	
-		list($records, $total) = run_query_and_get_records($connection, "SHOW STATUS", true);
+		list($records, $total) = run_query_and_get_records($connection, "SHOW STATUS;", true);
 		foreach($records as $record)	{
 			$return_array[] = array(
 				"variable"=>$record["Variable_name"],
@@ -153,7 +153,7 @@ switch($_REQUEST["flag"])	{
 	case "load_connection_process_list_information":
 		$return_array = array();
 		
-		$records = run_query_and_get_records($connection, "SELECT * FROM information_schema.PROCESSLIST");
+		$records = run_query_and_get_records($connection, "SELECT * FROM information_schema.PROCESSLIST;");
 		foreach($records as $record)	{
 			$return_array[] = array(
 				"id"=>$record["ID"],
@@ -168,6 +168,73 @@ switch($_REQUEST["flag"])	{
 		}
 		
 		$response = $return_array;
+		break;
+	case "load_connection_command_statistics_information":
+		//---Generate Array---//
+		$return_array = array();
+		$total = 0;
+		
+		$records = run_query_and_get_records($connection, "SHOW GLOBAL STATUS LIKE 'Com\_%';");
+		foreach($records as $record)	{
+			$total += $record["Value"];
+			
+			$return_array[] = array(
+				"command_type"=>substr(str_replace("_", " ", $record["Variable_name"]), 4),
+				"total_count"=>$record["Value"],
+				"avg_per_hour"=>0,
+				"avg_per_second"=>0,
+				"percentage"=>0
+			);
+		}
+		
+		array_unshift($return_array, array(
+			"command_type"=>"All Commands",
+			"total_count"=>$total,
+			"avg_per_hour"=>0,
+			"avg_per_second"=>0,
+			"percentage"=>100
+		));
+		
+		
+		//---Calculate Percentage---//
+		if($total)	{
+			foreach($return_array as $index=>$record)	{
+				$return_array[$index]["percentage"] = ($record["total_count"] / $total) * 100;
+			}
+		}
+		
+		
+		//---Do Sorting---//
+		if(array_key_exists("sorters", $_REQUEST))	{
+			$_REQUEST["sorters"] = json_decode($_REQUEST["sorters"], true);
+			
+			if(!function_exists("mysql_php_proxy_load_command_statistics_sort"))	{
+				function mysql_php_proxy_load_command_statistics_sort($in_a, $in_b)	{
+					foreach($_REQUEST["sorters"] as $sort)	{
+						$a = $in_a[$sort["field"]] * 1;
+						$b = $in_b[$sort["field"]] * 1;
+						$comp = $a - $b;
+						
+						if($comp != 0)	{
+							return $comp * ($sort["direction"] == "ASC" ? 1 : -1);
+						}
+					}
+					
+					return strcmp($in_a["command_type"], $in_b["command_type"]);
+				}
+			}
+			
+			usort($return_array, "mysql_php_proxy_load_command_statistics_sort");
+		}
+		
+		
+		//---Do Paging---//
+		$num_records = count($return_array);
+		$return_array = array_slice($return_array, $_REQUEST["start"], $_REQUEST["limit"]);
+		
+		
+		//---Set Response---//
+		$response = array("rows"=>$return_array, "total"=>$num_records);
 		break;
 	default:
 		display_response(false, "Unknown action (" . $_REQUEST["flag"] . ") to perform. Please contact your system administrator.");
@@ -213,7 +280,7 @@ function run_query_and_get_records(&$in_connection, $in_query, $in_paging=false)
 	
 	
 	//---Data Seek---//
-	if($start)	{
+	if($in_paging && $start)	{
 		mysql_data_seek($results, $start);
 	}
 
@@ -226,7 +293,7 @@ function run_query_and_get_records(&$in_connection, $in_query, $in_paging=false)
 		$return_array[] = $record;
 		
 		$count++;
-		if($count == $limit)	{
+		if($in_paging && $count == $limit)	{
 			break;
 		}
 	}

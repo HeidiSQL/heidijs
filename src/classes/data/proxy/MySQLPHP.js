@@ -194,20 +194,26 @@
 		loadConnectionProcessListInformation:function()	{
 			this.issueRequestWithFlagFromCallee("load_connection_process_list_information");
 		},
+		loadConnectionCommandStatisticsGrid:function()	{
+			this.issueRequestWithFlagFromCallee("load_connection_command_statistics_information");
+		},
 		
 		
 		//---Private Functions---//
 		issueRequestWithFlagFromCallee:function(inFlag)	{
 			var callerArguments = arguments.callee.caller.arguments,
 				callback = callerArguments[0],
-				start = callerArguments[1] || 0,
-				limit = callerArguments[2] || 50;
+				options = callerArguments[1],
+				start = options.start || 0,
+				limit = options.limit || 50,
+				sorters = options.sorters || [];
 		
 			this.issueRequest({
 				params:{
 					flag:inFlag,
 					start:start,
-					limit:limit
+					limit:limit,
+					sorters:Ext.encode(sorters)
 				},
 				callback:function(inResponse)	{
 					if(!inResponse)	{
