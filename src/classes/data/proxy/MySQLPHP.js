@@ -45,7 +45,7 @@
 			}
 			
 			paramElement.setAttribute("type", "hidden");
-			paramElement.setAttribute("value", inParamValue);
+			paramElement.setAttribute("value", (!Ext.isObject(inParamValue) ? inParamValue : Ext.encode(inParamValue)));
 			
 			form.appendChild(paramElement);
 		});
@@ -83,7 +83,7 @@
 
 	//---Class Definition---//
 	Ext.define("Heidi.data.proxy.MySQLPHP", {
-		extend:"Ext.data.proxy.Ajax",
+		extend:"Ext.data.proxy.Proxy",
 		alias:"proxy.mysqlphp",
 		
 		connectionTreeNodeIconCls:"icon-proxy-mysql-php-connection",
@@ -182,25 +182,45 @@
 		
 		
 		//---Class Specific Functions---//
-		loadConnectionDatabasesInformation:function()	{
-			this.issueRequestWithFlagFromCallee("load_databases_information");
+		getConnectionDatabasesInformationProxyConfig:function()	{
+			return this.getProxyConfigWithFlag("load_databases_information");
 		},
-		loadConnectionVariablesInformation:function()	{
-			this.issueRequestWithFlagFromCallee("load_connection_variables");
+		getConnectionVariablesInformationProxyConfig:function()	{
+			return this.getProxyConfigWithFlag("load_connection_variables", true);
 		},
-		loadConnectionStatusGridInformation:function()	{
-			this.issueRequestWithFlagFromCallee("load_connection_status_grid");
+		getConnectionStatusGridInformationProxyConfig:function()	{
+			return this.getProxyConfigWithFlag("load_connection_status_grid", true);
 		},
-		loadConnectionProcessListInformation:function()	{
-			this.issueRequestWithFlagFromCallee("load_connection_process_list_information");
+		getConnectionProcessListInformationProxyConfig:function()	{
+			return this.getProxyConfigWithFlag("load_connection_process_list_information");
 		},
-		loadConnectionCommandStatisticsGrid:function()	{
-			this.issueRequestWithFlagFromCallee("load_connection_command_statistics_information");
+		getConnectionCommandStatisticsGridProxyConfig:function()	{
+			return this.getProxyConfigWithFlag("load_connection_command_statistics_information", true);
 		},
 		
 		
 		//---Private Functions---//
+		getProxyConfigWithFlag:function(inFlag, inRootRowsReader)	{
+			var returnConfig = {
+					type:"mysqlphpcomet",
+					url:"providers/data/proxy/MySQLPHP.php",
+					extraParams:Ext.apply({
+						flag:inFlag
+					}, this.extraParams)
+				};
+			
+			if(inRootRowsReader)	{
+				returnConfig.reader = {
+					type:"json",
+					root:"rows",
+					totalProperty:"total"
+				};
+			}
+			
+			return returnConfig;
+		},
 		issueRequestWithFlagFromCallee:function(inFlag)	{
+debugger;
 			var callerArguments = arguments.callee.caller.arguments,
 				callback = callerArguments[0],
 				options = callerArguments[1],
@@ -230,6 +250,29 @@
 			options.params = Ext.apply(Ext.apply({}, this.extraParams), options.params);
 			
 			issueRequest(options);
+		}
+	});
+	
+	
+	//---Comet Proxy Class---//
+	Ext.define("Heidi.data.proxy.MySQLPHPComet", {
+		extend:"Ext.data.proxy.Ajax",
+		alias:"proxy.mysqlphpcomet",
+		
+		doRequest:function(inOperation, inCallback, inScope)	{
+			var me = this,
+				callback = function(inResponseText)	{
+					me.processResponse(true, inOperation, request, {
+						responseText:inResponseText
+					}, inCallback, inScope);
+				},
+				request = this.buildRequest(inOperation, callback, this);
+			
+			issueRequest({
+				url:request.url,
+				params:request.params,
+				callback:callback
+			});
 		}
 	});
 })();

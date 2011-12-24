@@ -69,6 +69,7 @@ if(!$connection)	{
 
 //---Check Flag---//
 $response = null;
+$json_encode_response = true;
 
 switch($_REQUEST["flag"])	{
 	case "load_databases":
@@ -88,6 +89,7 @@ switch($_REQUEST["flag"])	{
 		}
 		
 		$response = $return_array;
+		$json_encode_response = false;
 		break;
 	case "load_tables":
 		$return_array = array();
@@ -241,7 +243,7 @@ switch($_REQUEST["flag"])	{
 		break;
 }
 
-display_response(true, $response);
+display_response(true, ($json_encode_response ? json_encode($response) : $response));
 
 
 //---Functions---//

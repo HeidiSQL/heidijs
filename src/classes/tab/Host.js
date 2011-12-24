@@ -44,12 +44,6 @@ Ext.define("Heidi.tab.Host", {
 			iconCls:"icon-tab-host-databases",
 			
 			store:{
-				proxy:{
-					type:"memory",
-					reader:{
-						type:"json"
-					}
-				},
 				model:HOST_DATABASES_GRID_MODEL_NAME
 			},
 			columns:[
@@ -100,7 +94,7 @@ Ext.define("Heidi.tab.Host", {
 			],
 			forceFit:true,
 			
-			proxyInstanceMethodName:"loadConnectionDatabasesInformation"
+			proxyInstanceMethodName:"getConnectionDatabasesInformationProxyConfig"
 		});
 		
 		
@@ -117,12 +111,6 @@ Ext.define("Heidi.tab.Host", {
 		}
 		
 		var variablesGridStore = Ext.create("Ext.data.Store", {
-			proxy:{
-				type:"memory",
-				reader:{
-					type:"json"
-				}
-			},
 			model:HOST_VARIABLES_GRID_MODEL_NAME,
 			pageSize:50
 		});
@@ -156,7 +144,7 @@ Ext.define("Heidi.tab.Host", {
 				}
 			],
 			
-			proxyInstanceMethodName:"loadConnectionVariablesInformation"
+			proxyInstanceMethodName:"getConnectionVariablesInformationProxyConfig"
 		});
 		
 		
@@ -174,12 +162,6 @@ Ext.define("Heidi.tab.Host", {
 		}
 		
 		var statusGridStore = Ext.create("Ext.data.Store", {
-			proxy:{
-				type:"memory",
-				reader:{
-					type:"json"
-				}
-			},
 			model:HOST_STATUS_GRID_MODEL_NAME,
 			pageSize:50
 		});
@@ -223,7 +205,7 @@ Ext.define("Heidi.tab.Host", {
 				}
 			],
 			
-			proxyInstanceMethodName:"loadConnectionStatusGridInformation"
+			proxyInstanceMethodName:"getConnectionStatusGridInformationProxyConfig"
 		});
 		
 		
@@ -251,12 +233,6 @@ Ext.define("Heidi.tab.Host", {
 			iconCls:"icon-tab-host-process-list",
 			
 			store:{
-				proxy:{
-					type:"memory",
-					reader:{
-						type:"json"
-					}
-				},
 				model:HOST_PROCESS_LIST_GRID_MODEL_NAME
 			},
 			columns:[
@@ -303,7 +279,7 @@ Ext.define("Heidi.tab.Host", {
 			],
 			forceFit:true,
 			
-			proxyInstanceMethodName:"loadConnectionProcessListInformation"
+			proxyInstanceMethodName:"getConnectionProcessListInformationProxyConfig"
 		});
 		
 		
@@ -328,12 +304,6 @@ Ext.define("Heidi.tab.Host", {
 		}
 		
 		var commandStatisticsStore = Ext.create("Ext.data.Store", {
-			proxy:{
-				type:"memory",
-				reader:{
-					type:"json"
-				}
-			},
 			model:HOST_COMMAND_STATISTICS_GRID_MODEL_NAME,
 			sorters:[
 				{
@@ -399,7 +369,7 @@ Ext.define("Heidi.tab.Host", {
 				}
 			],
 			
-			proxyInstanceMethodName:"loadConnectionCommandStatisticsGrid",
+			proxyInstanceMethodName:"getConnectionCommandStatisticsGridProxyConfig",
 			includeSorters:true
 		});
 		
@@ -440,6 +410,8 @@ Ext.define("Heidi.tab.Host", {
 			inChildTab.el.mask("Loading...");
 			
 			function proxyLoadMethod(inCallback, inOptions)	{
+				inChildTab.store.setProxy(proxyInstance[inChildTab.proxyInstanceMethodName]());
+			
 				inOptions = Ext.apply({
 					start:0,
 					limit:50,
@@ -455,7 +427,10 @@ Ext.define("Heidi.tab.Host", {
 					});
 				}
 			
-				proxyInstance[inChildTab.proxyInstanceMethodName](inCallback, inOptions);
+				inChildTab.store.load({
+					params:inOptions,
+					callback:inCallback
+				});
 			}
 			proxyLoadMethod(loadChildTabStore);
 			

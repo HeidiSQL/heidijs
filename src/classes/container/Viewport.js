@@ -220,6 +220,7 @@ Ext.onReady(function()	{
 				var compatibleTab = Ext.create("Heidi.tab." + inCompatibleTabName, {
 					tabName:inCompatibleTabName,
 					hidden:true,
+					connectionNode:connectionNode,
 					
 					isCompatible:function(inTabNames)	{
 						return (inTabNames.indexOf(inCompatibleTabName) != -1);
