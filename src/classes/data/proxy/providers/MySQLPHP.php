@@ -84,6 +84,7 @@ switch($_REQUEST["flag"])	{
 				"connectionId"=>$_REQUEST["connection_id"],
 				"type"=>"database",
 				"text"=>$database_name,
+				"database"=>$database_name,
 				"iconCls"=>"icon-proxy-mysql-php-database"
 			);
 		}
@@ -110,6 +111,7 @@ switch($_REQUEST["flag"])	{
 		}
 	
 		$response = $return_array;
+		$json_encode_response = false;
 		break;
 	case "load_databases_information":
 		$return_array = array();
@@ -237,6 +239,55 @@ switch($_REQUEST["flag"])	{
 		
 		//---Set Response---//
 		$response = array("rows"=>$return_array, "total"=>$num_records);
+		break;
+	case "load_database_information":
+		$return_array = array();
+		$max_size = -1 * PHP_INT_MAX;
+	
+		list($records, $total) = run_query_and_get_records($connection, "SHOW TABLE STATUS FROM " . $_REQUEST["database"] . ";", true);
+		foreach($records as $record)	{
+			$size = $record["Data_length"];
+			if($size > $max_size)	{
+				$max_size = $size;
+			}
+			
+			$unit = "B";
+			if($size > 1024)	{
+				$size /= 1024;
+				if($size < 1024)	{
+					$unit = "KB";
+				}
+				else	{
+					$size /= 1024;
+					if($size < 1024)	{
+						$unit = "MB";
+					}
+					else	{
+						$size /= 1024;
+						$unit = "GB";
+					}
+				}
+			}
+		
+			$return_array[] = array(
+				"table_name"=>$record["Name"],
+				"num_rows"=>$record["Rows"],
+				"size"=>($size ? round($size, 1) . " " . $unit : ""),
+				"size_percent"=>$record["Data_length"],
+				"create_date"=>$record["Create_time"],
+				"modify_date"=>$record["Update_time"],
+				"engine"=>$record["Engine"],
+				"comment"=>$record["Comment"],
+				"type"=>($record["Comment"] != "VIEW" ? "Table" : "View")
+			);
+		}
+		
+		foreach($return_array as $index=>$record)	{
+			$return_array[$index]["size_percent"] = ($max_size ? ($record["size_percent"] / $max_size) * 100 : 0);
+		}
+		
+		
+		$response = array("rows"=>$return_array, "total"=>$total);
 		break;
 	default:
 		display_response(false, "Unknown action (" . $_REQUEST["flag"] . ") to perform. Please contact your system administrator.");

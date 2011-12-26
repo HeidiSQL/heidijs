@@ -197,6 +197,9 @@
 		getConnectionCommandStatisticsGridProxyConfig:function()	{
 			return this.getProxyConfigWithFlag("load_connection_command_statistics_information", true);
 		},
+		getDatabaseInformationProxyConfig:function()	{
+			return this.getProxyConfigWithFlag("load_database_information", true);
+		},
 		
 		
 		//---Private Functions---//

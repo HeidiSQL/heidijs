@@ -354,8 +354,8 @@ Ext.define("Heidi.tab.Host", {
 						else	{
 							value = value.substring(0, indexOfDecimal + 3);
 						}
-					
-						return "<div class='tab-host-command-statistics-percentage' style='width: " + inValue + "%'>" + value + "%</div>";
+						
+						return tabBackgroundPercentageRenderer(value, inValue, "%");
 					}
 				}
 			],
