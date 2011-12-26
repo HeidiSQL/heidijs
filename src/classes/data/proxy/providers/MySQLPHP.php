@@ -106,7 +106,8 @@ switch($_REQUEST["flag"])	{
 				"text"=>$table_name,
 				"iconCls"=>"icon-proxy-mysql-php-table",
 				"leaf"=>true,
-				"database"=>$_REQUEST["node_id"]
+				"database"=>$_REQUEST["node_id"],
+				"table"=>$table_name
 			);
 		}
 	
@@ -288,6 +289,15 @@ switch($_REQUEST["flag"])	{
 		
 		
 		$response = array("rows"=>$return_array, "total"=>$total);
+		break;
+	case "load_table_structure":
+		$return_array = array();
+		
+		$records = run_query_and_get_records($connection, "SHOW CREATE TABLE " . $_REQUEST["database"] . "." . $_REQUEST["table"] . ";");
+print_r($records);
+exit;
+		
+		$response = $return_array;
 		break;
 	default:
 		display_response(false, "Unknown action (" . $_REQUEST["flag"] . ") to perform. Please contact your system administrator.");

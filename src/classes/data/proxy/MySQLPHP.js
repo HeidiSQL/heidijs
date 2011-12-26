@@ -200,6 +200,9 @@
 		getDatabaseInformationProxyConfig:function()	{
 			return this.getProxyConfigWithFlag("load_database_information", true);
 		},
+		getTableStructureProxyConfig:function()	{
+			return this.getProxyConfigWithFlag("load_table_structure", true);
+		},
 		
 		
 		//---Private Functions---//
