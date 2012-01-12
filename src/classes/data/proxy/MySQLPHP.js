@@ -97,6 +97,15 @@
 				callback:inCallback
 			});
 		},
+		reestablishConnection:function(inConnectionId, inCallback)	{
+			this.issueRequest({
+				params:{
+					flag:"reestablish_connection",
+					connection_id:inConnectionId
+				},
+				callback:inCallback
+			});
+		},
 		bindToConnection:function(inConnectionId)	{
 			this.extraParams = Ext.apply(this.extraParams || {}, {
 				connection_id:inConnectionId

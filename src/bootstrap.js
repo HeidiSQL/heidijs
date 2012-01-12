@@ -7,5 +7,5 @@ Ext.override(Ext.window.Window, {
 //---Create Connection Manager---//
 Ext.onReady(function()	{
 	//---Create New Connection Manager---//
-	Heidi.window.ConnectionManager.show();
+	Heidi.window.ConnectionManager.bootstrap();
 });

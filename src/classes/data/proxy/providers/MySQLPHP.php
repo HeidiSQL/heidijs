@@ -53,6 +53,17 @@ if($_REQUEST["flag"] == "establish_connection")	{
 		display_response(true, $connection_id);
 	}
 }
+elseif($_REQUEST["flag"] == "reestablish_connection")	{
+	if(!array_key_exists("connections", $_SESSION))	{
+		display_response(false, "No existing connections found to reestablish.");
+	}
+	
+	if(!$_SESSION["connections"][$_REQUEST["connection_id"]])	{
+		display_response(false, "Specified connection could not be found in set of connections.");
+	}
+	
+	display_response(true, $_REQUEST["connection_id"]);
+}
 
 
 //---Establish Connection---//

@@ -21,6 +21,12 @@
 		return proxyInstance;
 	};
 	
+	function establishConnectionWithIdAndRecord(inConnectionId, inConnectionRecord)	{
+		Heidi.window.ConnectionManager.connectionEstablished(inConnectionRecord, inConnectionId);
+		Heidi.window.ConnectionManager.hide();
+		Heidi.container.Viewport.addConnection(inConnectionId);
+	}
+	
 	
 	//---Create Singleton---//
 	Heidi.window.ConnectionManager = Ext.create("Ext.window.Window", {
@@ -347,9 +353,7 @@
 													return false;
 												}
 												
-												Heidi.window.ConnectionManager.connectionEstablished(selectedSession, inConnectionId);
-												Heidi.window.ConnectionManager.hide();
-												Heidi.container.Viewport.addConnection(inConnectionId);
+												establishConnectionWithIdAndRecord(inConnectionId, selectedSession);
 											});
 										};
 									
@@ -439,6 +443,9 @@
 			
 			connectionIdXRecord[inConnectionId] = inRecord;
 			
+			Ext.util.Cookies.set("heidi-connectionmanager-last-connection-id", inConnectionId);
+			Ext.util.Cookies.set("heidi-connectionmanager-last-connection-name", inRecord.get("name"));
+			
 			inRecord.store.sync();
 		},
 		connectionRejected:function(inRecord)	{
@@ -486,6 +493,56 @@
 			}
 			
 			return proxyInstance.getCompatibleTabNamesFromNodeType(inTreeNode.get("type"));
+		},
+		
+		bootstrap:function()	{
+			//---Variables---//
+			var me = this;
+		
+		
+			//---Check Last Connetion---//
+			var lastConnectionId = Ext.util.Cookies.get("heidi-connectionmanager-last-connection-id");
+			if(lastConnectionId)	{
+				return Ext.MessageBox.confirm("Restore Last Connection", "Do you want to restore the last connection?", function(inButton)	{
+					if(inButton != "yes")	{
+						return me.show();
+					}
+					
+					Ext.getBody().mask("Loading...");
+					
+					var connectionsStore = me.getComponent(0).store;
+					connectionsStore.load({
+						callback:function()	{
+							var lastConnectionName = Ext.util.Cookies.get("heidi-connectionmanager-last-connection-name"),
+								lastConnectionRecordIndex = connectionsStore.findBy(function(inRecord) { return inRecord.get("name") == lastConnectionName; });
+							if(!lastConnectionRecordIndex == -1)	{
+								Ext.getBody().unmask();
+							
+								return Ext.MessageBox.alert("Error", "Unable to find reference to last connection.", function()	{
+									me.show();
+								});
+							}
+					
+							var lastConnectionRecord = connectionsStore.getAt(lastConnectionRecordIndex),
+								lastConnectionProxyType = lastConnectionRecord.get("proxy_type"),
+								proxy = Heidi.ProxyManager.create(lastConnectionProxyType);
+							proxy.reestablishConnection(lastConnectionId, function(inConnectionId)	{
+								Ext.getBody().unmask();
+							
+								if(!inConnectionId)	{
+									Ext.util.Cookies.clear("heidi-connectionmanager-last-connection-id");
+									Ext.util.Cookies.clear("heidi-connectionmanager-last-connection-name");
+									return me.show();
+								}
+								
+								establishConnectionWithIdAndRecord(inConnectionId, lastConnectionRecord);
+							});
+						}
+					});
+				});
+			}
+		
+			this.show();
 		}
 	});
 })();
