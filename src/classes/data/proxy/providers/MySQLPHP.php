@@ -324,6 +324,17 @@ switch($_REQUEST["flag"])	{
 		
 		$response = $return_array;
 		break;
+	case "load_detailed_table_structure":
+		$record = array();
+		
+		$create_table_record = run_query_and_get_record_parts($connection, "SHOW CREATE TABLE " . $_REQUEST["database"] . "." . $_REQUEST["table"] . ";");
+		$record["create_table_query"] = $create_table_record["Create Table"];
+		
+		preg_match("/COMMENT=['\"]([^'\"]+)['\"]/", $record["create_table_query"], $matches);
+		$record["comments"] = (array_key_exists(1, $matches) ? $matches[1] : "");
+		
+		$response = $record;
+		break;
 	default:
 		display_response(false, "Unknown action (" . $_REQUEST["flag"] . ") to perform. Please contact your system administrator.");
 		break;
@@ -387,6 +398,10 @@ function run_query_and_get_records(&$in_connection, $in_query, $in_paging=false)
 	}
 	
 	return (!$in_paging ? $return_array : array($return_array, mysql_num_rows($results)));
+}
+
+function run_query_and_get_record_parts(&$in_connection_id, $in_query, $in_paging=false)	{
+	return reset(run_query_and_get_records($in_connection_id, $in_query, $in_paging));
 }
 
 function append_status_message($in_message, $in_type="query")	{

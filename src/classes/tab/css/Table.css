@@ -13,6 +13,10 @@
 	padding: 5px;
 }
 
+.tab-table-body-border-container {
+	background-color: #FFF;
+}
+
 
 /*---Grid Editor---*/
 .tab-table-basic-number-column-cell .x-grid-cell-inner {

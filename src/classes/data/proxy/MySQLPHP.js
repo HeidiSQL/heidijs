@@ -212,9 +212,34 @@
 		getTableStructureProxyConfig:function()	{
 			return this.getProxyConfigWithFlag("load_table_structure", true);
 		},
+		getDetailedTableStructureProxyInstance:function(inCallback)	{
+			return this.getProxyInstanceWithFlag("load_detailed_table_structure", inCallback);
+		},
 		
 		
 		//---Private Functions---//
+		getProxyInstanceWithFlag:function(inFlag)	{
+			var config = this.getProxyConfigWithFlag.apply(this, arguments);
+			
+			config.reader = Ext.createByAlias("reader." + config.reader.type, config.reader);
+			
+			var instance = Ext.createByAlias("proxy." + config.type, config);
+			instance.load = function(inOptions)	{ // Helper function
+				config.reader.readRecords = function(inData)	{
+					inOptions.callback(inData);
+				
+					return {
+						success:true,
+						records:inData
+					};
+				};
+			
+				var operation = Ext.create("Ext.data.Operation", inOptions || {});
+				instance.doRequest(operation, Ext.emptyFn, this);
+			};
+			
+			return instance;
+		},
 		getProxyConfigWithFlag:function(inFlag, inRootRowsReader)	{
 			var returnConfig = {
 					type:"mysqlphpcomet",
@@ -224,12 +249,14 @@
 					}, this.extraParams)
 				};
 			
+			returnConfig.reader = {
+					type:"json"
+			};
 			if(inRootRowsReader)	{
-				returnConfig.reader = {
-					type:"json",
+				Ext.apply(returnConfig.reader, {
 					root:"rows",
 					totalProperty:"total"
-				};
+				});
 			}
 			
 			return returnConfig;

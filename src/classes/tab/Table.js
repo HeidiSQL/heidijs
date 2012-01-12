@@ -19,41 +19,50 @@
 			
 			
 			//---Create Basic Form---//
-			var basicForm = Ext.create("Ext.panel.Panel",	{
+			this.basicForm = Ext.create("Ext.form.Panel",	{
 				title:"Basic",
 				iconCls:"icon-tab-table-basic-form",
 				cls:"tab-table-body",
-				layout:"border",
-				border:false,
-				
-				defaults:{
-					xtype:"form",
-					border:false,
-					defaults:{
-						anchor:"100%",
-						border:false
-					}
-				},
+				layout:"fit",
 				items:[
 					{
-						region:"north",
-						height:25,
-						items:[
-							{
-								xtype:"textfield",
-								name:"name",
-								fieldLabel:"Name"
+						xtype:"container",
+						
+						layout:"border",
+						cls:"tab-table-body-border-container",
+						border:false,
+						
+						defaults:{
+							xtype:"container",
+							border:false,
+							layout:"fit",
+							defaults:{
+								anchor:"100%",
+								border:false
 							}
-						]
-					},
-					{
-						region:"center",
-						layout:"fit",
+						},
 						items:[
 							{
-								xtype:"textarea",
-								name:"comments",
-								fieldLabel:"Comments"
+								region:"north",
+								height:25,
+								items:[
+									{
+										xtype:"textfield",
+										name:"name",
+										fieldLabel:"Name"
+									}
+								]
+							},
+							{
+								region:"center",
+								layout:"fit",
+								items:[
+									{
+										xtype:"textarea",
+										name:"comments",
+										fieldLabel:"Comments"
+									}
+								]
 							}
 						]
 					}
@@ -73,7 +82,7 @@
 				minHeight:125,
 				
 				items:[
-					basicForm
+					this.basicForm
 				]
 			});
 			
@@ -174,14 +183,20 @@
 		},
 		
 		syncWithTreeNode:function(inTreeNode)	{
+			//---Variables---//
 			var proxyInstance = inTreeNode.get("proxyInstance"),
 				grid = this.gridPanel,
+				formPanel = this.basicForm,
 				database = inTreeNode.get("database"),
 				table = inTreeNode.get("table");
-			
+				
+				
+			//---Sync Tab---//
 			this.setTitle("Table: " + table);
 			this.proxyInstance = proxyInstance;
 			
+			
+			//---Update Table Editor Grid---//
 			grid.store.setProxy(proxyInstance.getTableStructureProxyConfig());
 			Ext.apply(grid.store.proxy.extraParams, {
 				database:database,
@@ -189,6 +204,32 @@
 			});
 			
 			grid.store.load();
+			
+			
+			//---Update Editor Tabs---//
+			var form = formPanel.getForm();
+			form.setValues({
+				name:table
+			});
+			
+			if(formPanel.el)	{
+				formPanel.el.mask("Loading...");
+			}
+			
+			var detailedTableStructureProxyInstance = proxyInstance.getDetailedTableStructureProxyInstance();
+			detailedTableStructureProxyInstance.load({
+				params:{
+					database:database,
+					table:table
+				},
+				callback:function(inData)	{
+					if(formPanel.el)	{
+						formPanel.el.unmask();
+					}
+					
+					form.setValues(inData);
+				}
+			});
 		}
 	});
 	
