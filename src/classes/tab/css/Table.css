@@ -25,3 +25,9 @@
 .tab-table-basic-primary-key-row-cell .x-grid-cell-inner	{
 	font-weight: bold;
 }
+
+.tab-table-basic-primary-key-number-cell .x-grid-cell-inner {
+	background-image: url(../images/key.png);
+	background-position: 2px 1px;
+	background-repeat: no-repeat;
+}
