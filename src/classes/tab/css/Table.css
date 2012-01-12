@@ -1,3 +1,27 @@
+/*---Icons---*/
 .icon-tab-table	{
 	background-image: url(../images/table.png);
+}
+
+.icon-tab-table-basic-form {
+	background-image: url(../images/table_gear.png);
+}
+
+
+/*---Tab Styles---*/
+.tab-table-body {
+	padding: 5px;
+}
+
+
+/*---Grid Editor---*/
+.tab-table-basic-number-column-cell .x-grid-cell-inner {
+	background-color: #BBB;
+}
+.tab-table-basic-number-column, .tab-table-basic-number-column-cell .x-grid-cell-inner	{
+	text-align: right !important;
+}
+
+.tab-table-basic-primary-key-row-cell .x-grid-cell-inner	{
+	font-weight: bold;
 }

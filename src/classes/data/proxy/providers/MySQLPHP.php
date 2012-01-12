@@ -293,9 +293,23 @@ switch($_REQUEST["flag"])	{
 	case "load_table_structure":
 		$return_array = array();
 		
-		$records = run_query_and_get_records($connection, "SHOW CREATE TABLE " . $_REQUEST["database"] . "." . $_REQUEST["table"] . ";");
-print_r($records);
-exit;
+		$records = run_query_and_get_records($connection, "DESCRIBE " . $_REQUEST["database"] . "." . $_REQUEST["table"] . ";");
+		foreach($records as $record)	{
+			list($data_type, $length_and_extras) = explode("(", $record["Type"]);
+			list($length, $extras) = explode(")", $length_and_extras);
+			list($unsigned, $zerofill) = explode(" ", $extras);
+		
+			$return_array[] = array(
+				"primary_key"=>($record["Key"] == "PRI"),
+				"field_name"=>$record["Field"],
+				"data_type"=>$data_type,
+				"length"=>$length,
+				"unsigned"=>($unsigned == "unsigned"),
+				"allow_null"=>($record["Null"] != "NO"),
+				"zerofill"=>($zerofill == "zerofill"),
+				"default"=>$record["Default"]
+			);
+		}
 		
 		$response = $return_array;
 		break;

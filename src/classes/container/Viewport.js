@@ -105,6 +105,7 @@ Ext.onReady(function()	{
 		return Ext.create("Ext.panel.Panel", {
 			region:"south",
 			height:150,
+			minHeight:50,
 			resizable:true,
 			autoScroll:true,
 			html:"<ol class='viewport-status-panel-list'></ol>",
