@@ -195,7 +195,20 @@
 								]
 							},
 							valueField:"display",
-							displayField:"display"
+							displayField:"display",
+							listConfig:{
+								cls:TABLE_EDITOR_BASE_CLS + "list",
+								tpl:Ext.create('Ext.XTemplate',
+									'<ul><tpl for=".">',
+										'<li role="option" class="' + Ext.view.BoundList.prototype.itemCls + ' ' + TABLE_EDITOR_BASE_CLS + 'list-field {cls} ">{display}</li>',
+									'</tpl></ul>'
+								)
+							},
+							listeners:{
+								beforeselect:function(inCombo, inRecord)	{
+									return inRecord.get("selectable");
+								}
+							}
 						}
 					},
 					{

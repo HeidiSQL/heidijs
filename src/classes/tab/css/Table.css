@@ -38,8 +38,17 @@
 
 
 /*---Data Types---*/
+.tab-table-data-type-list-field	{
+	padding-left: 15px;
+}
+
 .tab-table-data-type-category	{
 	color: #000;
+}
+
+.tab-table-data-type-list .tab-table-data-type-category	{
+	font-weight: bold;
+	padding-left: 0px;
 }
 
 .tab-table-data-type-integer	{
