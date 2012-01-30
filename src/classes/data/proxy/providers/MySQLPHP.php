@@ -307,6 +307,7 @@ switch($_REQUEST["flag"])	{
 		$records = run_query_and_get_records($connection, "DESCRIBE " . $_REQUEST["database"] . "." . $_REQUEST["table"] . ";");
 		foreach($records as $record)	{
 			list($data_type, $length_and_extras) = explode("(", $record["Type"]);
+			$data_type = strtoupper($data_type);
 			list($length, $extras) = explode(")", $length_and_extras);
 			list($unsigned, $zerofill) = explode(" ", $extras);
 		

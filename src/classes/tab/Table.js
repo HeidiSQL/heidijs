@@ -15,7 +15,9 @@
 			//---Constants---//;
 			var TABLE_GRID_MODEL_NAME = "TableGridModelName",
 				TABLE_INDEXES_GRID_MODEL_NAME = "TableIndexesGridModelName",
-				TABLE_FOREIGN_KEYS_GRID_MODEL_NAME = "TableForeignKeysGridModelName";
+				TABLE_FOREIGN_KEYS_GRID_MODEL_NAME = "TableForeignKeysGridModelName",
+				TABLE_EDITOR_DATATYPE_COMBO_MODEL_NAME = "TableEditorDatatypeComboModelName",
+				TABLE_EDITOR_BASE_CLS = "tab-table-data-type-";
 			
 			
 			//---Create Basic Form---//
@@ -104,6 +106,17 @@
 				});
 			}
 			
+			if(!Ext.ModelManager.getModel(TABLE_EDITOR_DATATYPE_COMBO_MODEL_NAME))	{
+				Ext.define(TABLE_EDITOR_DATATYPE_COMBO_MODEL_NAME, {
+					extend:"Ext.data.Model",
+					fields:[
+						"display",
+						"selectable",
+						"cls"
+					]
+				});
+			}
+			
 			this.gridPanel = this.add({
 				xtype:"gridpanel",
 				
@@ -137,7 +150,53 @@
 						text:"Data Type",
 						dataIndex:"data_type",
 						width:12.5,
-						renderer:tableEditorGenericColumnRenderer
+						renderer:tableEditorGenericColumnRenderer,
+						editor:{
+							xtype:"combo",
+							store:{
+								proxy:{
+									type:"memory",
+									reader:{
+										type:"json"
+									}
+								},
+								model:TABLE_EDITOR_DATATYPE_COMBO_MODEL_NAME,
+								data:[
+									{
+										display:"Integer",
+										selectable:false,
+										cls:TABLE_EDITOR_BASE_CLS + "category"
+									},
+									{
+										display:"TINYINT",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "integer"
+									},
+									{
+										display:"SMALLINT",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "integer"
+									},
+									{
+										display:"MEDIUMINT",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "integer"
+									},
+									{
+										display:"INT",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "integer"
+									},
+									{
+										display:"BIGINT",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "integer"
+									}
+								]
+							},
+							valueField:"display",
+							displayField:"display"
+						}
 					},
 					{
 						text:"Length",
@@ -235,9 +294,33 @@
 	
 	
 	//---Renderers---//
-	function tableEditorGenericColumnRenderer(inValue, inMeta, inRecord, inRowIndex, inColumnIndex)	{
+	function tableEditorGenericColumnRenderer(inValue, inMeta, inRecord, inRowIndex, inColumnIndex, inStore, inView)	{
+		var tdCls = "";
+	
+		if(inView)	{
+			var column = inView.headerCt.getComponent(inColumnIndex),
+				editor = column.getEditor();
+			
+			if(editor && editor.store && editor.displayField && editor.valueField)	{
+				var editorRecordIndex = editor.store.findBy(function(inEditorRecord) { return inEditorRecord.get(editor.valueField) == inValue; });
+				
+				if(editorRecordIndex != -1)	{
+					var editorRecord = editor.store.getAt(editorRecordIndex),
+						editorRecordCls = editorRecord.get("cls");
+					
+					if(editorRecordCls)	{
+						tdCls += " " + editorRecordCls;
+					}
+				}
+			}
+		}
+	
 		if(inRecord.get("primary_key"))	{
-			inMeta.tdCls = (inMeta.tdCls || "") + " tab-table-basic-primary-key-row-cell" + (inColumnIndex == 0 ? " tab-table-basic-primary-key-number-cell" : "")
+			tdCls += " tab-table-basic-primary-key-row-cell" + (inColumnIndex == 0 ? " tab-table-basic-primary-key-number-cell" : "")
+		}
+		
+		if(tdCls)	{
+			inMeta.tdCls = (inMeta.tdCls || "") + " " + tdCls;
 		}
 		
 		return inValue;

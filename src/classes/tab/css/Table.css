@@ -35,3 +35,13 @@
 	background-position: 2px 1px;
 	background-repeat: no-repeat;
 }
+
+
+/*---Data Types---*/
+.tab-table-data-type-category	{
+	color: #000;
+}
+
+.tab-table-data-type-integer	{
+	color: #00A;
+}
