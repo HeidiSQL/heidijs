@@ -112,7 +112,8 @@
 					fields:[
 						"display",
 						"selectable",
-						"cls"
+						"cls",
+						"qtip"
 					]
 				});
 			}
@@ -149,7 +150,7 @@
 					{
 						text:"Data Type",
 						dataIndex:"data_type",
-						width:12.5,
+						width:18,
 						renderer:tableEditorGenericColumnRenderer,
 						editor:{
 							xtype:"combo",
@@ -170,27 +171,245 @@
 									{
 										display:"TINYINT",
 										selectable:true,
-										cls:TABLE_EDITOR_BASE_CLS + "integer"
+										cls:TABLE_EDITOR_BASE_CLS + "integer",
+										qtip:"Storage: 1B<br><br>Signed: -128 to 127<br>Unsigned: 0 to 255"
 									},
 									{
 										display:"SMALLINT",
 										selectable:true,
-										cls:TABLE_EDITOR_BASE_CLS + "integer"
+										cls:TABLE_EDITOR_BASE_CLS + "integer",
+										qtip:"Storage: 2B<br><br>Signed: -32,768 to 32,767<br>Unsigned: 0 to 65,535"
 									},
 									{
 										display:"MEDIUMINT",
 										selectable:true,
-										cls:TABLE_EDITOR_BASE_CLS + "integer"
+										cls:TABLE_EDITOR_BASE_CLS + "integer",
+										qtip:"Storage: 3B<br><br>Signed: -8,388,608 to 8,388,607<br>Unsigned: 0 to 16,777,215"
 									},
 									{
 										display:"INT",
 										selectable:true,
-										cls:TABLE_EDITOR_BASE_CLS + "integer"
+										cls:TABLE_EDITOR_BASE_CLS + "integer",
+										qtip:"Storage: 4B<br><br>Signed: -2,147,483,648 to 2,147,483,647<br>Unsigned: 0 to 4,294,967,295"
 									},
 									{
 										display:"BIGINT",
 										selectable:true,
-										cls:TABLE_EDITOR_BASE_CLS + "integer"
+										cls:TABLE_EDITOR_BASE_CLS + "integer",
+										qtip:"Storage: 8B<br><br>Signed: -9,223,372,036,843,774,808 to 9,233,372,036,843,744,807<br>Unsigned: 0 to 18,446,744,073,709,551,615"
+									},
+									{
+										display:"Integer, named (nonstandard)",
+										selectable:false,
+										cls:TABLE_EDITOR_BASE_CLS + "category"
+									},
+									{
+										display:"ENUM",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "integer-named"
+									},
+									{
+										display:"Real",
+										selectable:false,
+										cls:TABLE_EDITOR_BASE_CLS + "category"
+									},
+									{
+										display:"FLOAT",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "real",
+										qtip:"Length: M, D<br>M: total number of digits<br>D: number of digits follow the decimal"
+									},
+									{
+										display:"DOUBLE",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "real",
+										qtip:"Length: M, D<br>M: total number of digits<br>D: number of digits follow the decimal"
+									},
+									{
+										display:"DECIMAL",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "real",
+										qtip:"Length: M, D<br>M: total number of digits<br>D: number of digits follow the decimal"
+									},
+									{
+										display:"Text",
+										selectable:false,
+										cls:TABLE_EDITOR_BASE_CLS + "category"
+									},
+									{
+										display:"CHAR",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "char",
+										qtip:"Fixed length string with right-padded spaces.<br>Max length: 255 characters"
+									},
+									{
+										display:"VARCHAR",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "char",
+										qtip:"Variable length string.<br>Max length: 255 characters"
+									},
+									{
+										display:"TINYTEXT",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "char",
+										qtip:"Max length: 255 characters"
+									},
+									{
+										display:"TEXT",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "char",
+										qtip:"Max length: 65,535 characters"
+									},
+									{
+										display:"MEDIUMTEXT",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "char",
+										qtip:"Max length: 16,777,215 characters"
+									},
+									{
+										display:"LONGTEXT",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "char",
+										qtip:"Max length: 4,294,967,295 characters"
+									},
+									{
+										display:"Binary",
+										selectable:false,
+										cls:TABLE_EDITOR_BASE_CLS + "category"
+									},
+									{
+										display:"BINARY",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "binary"
+									},
+									{
+										display:"VARBINARY",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "binary"
+									},
+									{
+										display:"TINYBLOB",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "binary",
+										qtip:"Max length: 255 bytes"
+									},
+									{
+										display:"BLOB",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "binary",
+										qtip:"Max length: 65,535 bytes"
+									},
+									{
+										display:"MEDIUMBLOB",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "binary",
+										qtip:"Max length: 16,777,215 bytes"
+									},
+									{
+										display:"LONGBLOB",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "binary",
+										qtip:"Max length: 4,294,967,295 bytes"
+									},
+									{
+										display:"Temporal (time)",
+										selectable:false,
+										cls:TABLE_EDITOR_BASE_CLS + "category"
+									},
+									{
+										display:"DATE",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "temporal",
+										qtip:"Format: YYYY-MM-DD<br><br>Minimum: 1000-01-01<br>Maximum: 9999-12-31"
+									},
+									{
+										display:"TIME",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "temporal",
+										qtip:"Format: HH:MM:SS<br><br>Minimum: -838:59:59<br>Maximum: 838:59:59"
+									},
+									{
+										display:"YEAR",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "temporal",
+										qtip:"Formats: two or four digits<br><br>Two digit range: 70 to 69<br>Four digit range: 1970 to 2069"
+									},
+									{
+										display:"DATETIME",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "temporal",
+										qtip:"Format: YYYY-MM-DD HH:MM:SS<br><br>Minimum: 1000-01-01 00:00:00<br>Maximum: 9999-12-31 23:59:59"
+									},
+									{
+										display:"TIMESTAMP",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "temporal",
+										qtip:"Format: YYYY-MM-DD HH:MM:SS<br><br>Minimum: 1970-01-01 00:00:01<br>Maximum: 2038-01-19 03:14:07"
+									},
+									{
+										display:"Spatial (gemoetry)",
+										selectable:false,
+										cls:TABLE_EDITOR_BASE_CLS + "category"
+									},
+									{
+										display:"POINT",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "spatial"
+									},
+									{
+										display:"LINESTRING",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "spatial"
+									},
+									{
+										display:"POLYGON",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "spatial"
+									},
+									{
+										display:"GEOMETRY",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "spatial"
+									},
+									{
+										display:"MULTIPOINT",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "spatial"
+									},
+									{
+										display:"MULTILINESTRING",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "spatial"
+									},
+									{
+										display:"MULTIPOLYGON",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "spatial"
+									},
+									{
+										display:"GEOMETRYCOLLECTION",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "spatial"
+									},
+									{
+										display:"Set of Bits (nonstandard)",
+										selectable:false,
+										cls:TABLE_EDITOR_BASE_CLS + "category"
+									},
+									{
+										display:"BIT",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "set-of-bits"
+									},
+									{
+										display:"Set of Bits, named (nonstandard)",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "category"
+									},
+									{
+										display:"SET",
+										selectable:true,
+										cls:TABLE_EDITOR_BASE_CLS + "set-of-bits-named"
 									}
 								]
 							},
@@ -198,9 +417,10 @@
 							displayField:"display",
 							listConfig:{
 								cls:TABLE_EDITOR_BASE_CLS + "list",
+								minWidth:125,
 								tpl:Ext.create('Ext.XTemplate',
 									'<ul><tpl for=".">',
-										'<li role="option" class="' + Ext.view.BoundList.prototype.itemCls + ' ' + TABLE_EDITOR_BASE_CLS + 'list-field {cls} ">{display}</li>',
+										'<li role="option" class="' + Ext.view.BoundList.prototype.itemCls + ' ' + TABLE_EDITOR_BASE_CLS + 'list-field {cls}" {[values.qtip ? "data-qtip=" + Ext.encode(values.qtip) : ""]}>{display}</li>',
 									'</tpl></ul>'
 								)
 							},
@@ -308,7 +528,8 @@
 	
 	//---Renderers---//
 	function tableEditorGenericColumnRenderer(inValue, inMeta, inRecord, inRowIndex, inColumnIndex, inStore, inView)	{
-		var tdCls = "";
+		var tdCls = "",
+			tdAttr = "";
 	
 		if(inView)	{
 			var column = inView.headerCt.getComponent(inColumnIndex),
@@ -319,10 +540,14 @@
 				
 				if(editorRecordIndex != -1)	{
 					var editorRecord = editor.store.getAt(editorRecordIndex),
-						editorRecordCls = editorRecord.get("cls");
+						editorRecordCls = editorRecord.get("cls"),
+						editorRecordQtip = editorRecord.get("qtip");
 					
 					if(editorRecordCls)	{
 						tdCls += " " + editorRecordCls;
+					}
+					if(editorRecordQtip)	{
+						tdAttr += " data-qtip=" + Ext.encode(editorRecordQtip);
 					}
 				}
 			}
@@ -334,6 +559,9 @@
 		
 		if(tdCls)	{
 			inMeta.tdCls = (inMeta.tdCls || "") + " " + tdCls;
+		}
+		if(tdAttr)	{
+			inMeta.tdAttr = (inMeta.tdAttr || "") + " " + tdAttr;
 		}
 		
 		return inValue;

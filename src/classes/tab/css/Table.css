@@ -54,3 +54,31 @@
 .tab-table-data-type-integer	{
 	color: #00A;
 }
+
+.tab-table-data-type-integer-named	{
+	color: #25F;
+}
+
+.tab-table-data-type-real	{
+	color: #08A;
+}
+
+.tab-table-data-type-char	{
+	color: #0A0;
+}
+
+.tab-table-data-type-binary	{
+	color: #80A;
+}
+
+.tab-table-data-type-temporal	{
+	color: #A00;
+}
+
+.tab-table-data-type-spatial	{
+	color: #A80;
+}
+
+.tab-table-data-type-set-of-bits, .tab-table-data-type-set-of-bits-named	{
+	color: #888;
+}
