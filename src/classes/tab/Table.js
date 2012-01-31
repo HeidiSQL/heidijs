@@ -435,25 +435,31 @@
 						text:"Length",
 						dataIndex:"length",
 						width:12.5,
-						renderer:tableEditorGenericColumnRenderer
+						renderer:tableEditorGenericColumnRenderer,
+						editor:{
+							xtype:"numberfield",
+							allowBlank:true,
+							minValue:0,
+							allowDecimals:false
+						}
 					},
 					{
+						xtype:"checkcolumn",
 						text:"Unsigned",
 						dataIndex:"unsigned",
-						width:12.5,
-						renderer:tableEditorGenericColumnRenderer
+						width:12.5
 					},
 					{
+						xtype:"checkcolumn",
 						text:"Allow Null",
 						dataIndex:"allow_null",
-						width:12.5,
-						renderer:tableEditorGenericColumnRenderer
+						width:12.5
 					},
 					{
+						xtype:"checkcolumn",
 						text:"Zerofill",
 						dataIndex:"zerofill",
-						width:12.5,
-						renderer:tableEditorGenericColumnRenderer
+						width:12.5
 					},
 					{
 						text:"Default",

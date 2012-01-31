@@ -75,7 +75,7 @@ function get_src_files_from_directory($in_directory, &$in_src_files)	{
 		elseif(substr_count($file_lower, ".css") == 1)	{
 			$in_src_files["css"][] = $file_path;
 		}
-		elseif(substr_count($file_lower, ".png") == 1)	{
+		elseif(substr_count($file_lower, ".png") == 1 || substr_count($file_lower, ".gif") == 1)	{
 			$in_src_files["images"][] = $file_path;
 		}
 		elseif(substr_count($file_lower, ".php") == 1 && substr_count($file_path_lower, "/providers/") == 1)	{
