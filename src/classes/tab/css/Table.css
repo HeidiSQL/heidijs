@@ -82,3 +82,18 @@
 .tab-table-data-type-set-of-bits, .tab-table-data-type-set-of-bits-named	{
 	color: #888;
 }
+
+
+/*---Deafult Column---*/
+.tab-table-editor-default-auto-increment .x-grid-cell-inner	{
+	font-weight: bold;
+}
+
+.tab-table-editor-default-null-current-timestamp .x-grid-cell-inner	{
+	font-weight: bold;
+}
+
+.tab-table-editor-default-no-default .x-grid-cell-inner	{
+	color: #888;
+	font-style: italic;
+}

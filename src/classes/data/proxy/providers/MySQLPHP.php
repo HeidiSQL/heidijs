@@ -319,7 +319,7 @@ switch($_REQUEST["flag"])	{
 				"unsigned"=>($unsigned == "unsigned"),
 				"allow_null"=>($record["Null"] != "NO"),
 				"zerofill"=>($zerofill == "zerofill"),
-				"default"=>$record["Default"]
+				"default"=>($record["Extra"] ? $record["Extra"] : $record["Default"])
 			);
 		}
 		

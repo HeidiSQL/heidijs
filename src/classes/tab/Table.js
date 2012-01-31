@@ -465,12 +465,148 @@
 						text:"Default",
 						dataIndex:"default",
 						width:12.5,
-						renderer:tableEditorGenericColumnRenderer
+						renderer:function(inValue, inMeta)	{
+							var tdCls = "",
+								val = (inValue + "").toUpperCase();
+						
+							switch(val)	{
+								case "AUTO_INCREMENT":
+									tdCls = "tab-table-editor-default-auto-increment";
+									break;
+								case "NULL":
+								case "CURRENT_TIMESTAMP":
+									tdCls = "tab-table-editor-default-null-current-timestamp";
+									break;
+								case "":
+									tdCls = "tab-table-editor-default-no-default";
+									val = "No default value";
+									break;
+								default:
+									tdCls = "tab-table-editor-default-custom-value";
+									break;
+							}
+							
+							inMeta.tdCls += (inMeta.tdCls || "") + " " + tdCls;
+							
+							return val;
+						},
+						cellSelected:function(inRecord, inEvent)	{
+debugger;
+							var currentValue = inRecord.get("default"),
+								isDefaultValue = (currentValue === null),
+								isNullValue = (currentValue == "null"),
+								isCurrentTimestampValue = false,
+								isAutoIncrementValue = (currentValue == "auto_increment"),
+								isCustomValue = !isDefaultValue && !isNullValue && !isCurrentTimestampValue && !isAutoIncrementValue;
+								
+							var newMenu = Ext.create("Ext.menu.Menu", {
+								defaults:{
+									xtype:"menucheckitem",
+									group:"tabTableEditorDefaultColumnMenu",
+									hideOnClick:false,
+									listeners:{
+										checkchange:function(inItem, inChecked, inOptions)	{
+											if(!inItem.checkChanged)	{
+												return false;
+											}
+											
+											inItem.checkChanged(inChecked);
+										}
+									}
+								},
+								items:[
+									{
+										text:"No default value",
+										checked:isDefaultValue
+									},
+									{
+										xtype:"menuseparator"
+									},
+									{
+										text:"Custom",
+										checked:isCustomValue,
+										checkChanged:function(inChecked)	{
+											this.nextSibling()[inChecked ? "show" : "hide"]();
+										}
+									},
+									{
+										xtype:"textarea",
+										name:"custom",
+										anchor:"100%",
+										height:75,
+										hidden:!isCustomValue,
+										value:currentValue
+									},
+									{
+										xtype:"menuseparator"
+									},
+									{
+										text:"NULL",
+										checked:isNullValue
+									},
+									{
+										text:"CURRENT_TIMESTAMP",
+										checked:isCurrentTimestampValue,
+										checkChanged:function(inChecked)	{
+											this.nextSibling()[inChecked ? "show" : "hide"]();
+										}
+									},
+									{
+										group:"tabTableEditorDefaultColumnMenuUnique",
+										text:"On Update CURRENT_TIMESTAMP",
+										name:"onUpdateCurrentTimestamp",
+										hidden:true
+									},
+									{
+										xtype:"menuseparator"
+									},
+									{
+										text:"AUTO_INCREMENT",
+										checked:isAutoIncrementValue
+									}
+								],
+								dockedItems:[
+									{
+										xtype:"toolbar",
+										dock:"bottom",
+										defaults:{
+											xtype:"button"
+										},
+										items:[
+											{
+												text:"OK",
+												handler:function()	{
+debugger;
+													newMenu.hide();
+												}
+											},
+											{
+												text:"Cancel",
+												handler:function()	{
+													newMenu.hide();
+												}
+											}
+										]
+									}
+								]
+							});
+							
+							newMenu.showAt(inEvent.xy[0], inEvent.xy[1]);
+						}
 					}
 				],
 				forceFit:true,
 				selModel:{
-					selType:"cellmodel"
+					selType:"cellmodel",
+					listeners:{
+						select:function(inCelModel, inRecord, inRow, inColumn)	{
+							var column = inCelModel.view.headerCt.getComponent(inColumn);
+							
+							if(column.cellSelected && inCelModel.view.lastMouseDownEvent)	{
+								column.cellSelected(inRecord, inCelModel.view.lastMouseDownEvent);
+							}
+						}
+					}
 				},
 				plugins:[
 					Ext.create("Ext.grid.plugin.CellEditing", {
