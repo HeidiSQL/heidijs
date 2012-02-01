@@ -2,6 +2,7 @@
 
 //---Configuration---//
 $do_build = (array_key_exists("build", $_REQUEST) && $_REQUEST["build"]);
+$do_build_after_run = (!$do_build && ($_REQUEST["major"] || $_REQUEST["minor"]));
 $build_folder = "../build/"; 
 $link_folder = (!$do_build ? "../link/" : $build_folder);
 $namespace_prefix = "Heidi";
@@ -325,6 +326,18 @@ $copied_index_file = file_put_contents($link_index_file, $index_file_contents);
 if($copied_index_file === false)	{
 	echo "Error: unable to copy index file.";
 	exit;
+}
+
+
+//---Check Build After---//
+if($do_build_after_run)	{
+	if($_SERVER["SERVER_PORT"] != 80)	{
+		echo "Error: unknown port when building.";
+		exit;
+	}
+	
+	$url = "http://" . $_SERVER["HTTP_HOST"] . $_SERVER["PHP_SELF"] . "?build=1";
+	file_get_contents($url);
 }
 
 
