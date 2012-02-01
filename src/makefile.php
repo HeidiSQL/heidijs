@@ -1,7 +1,9 @@
 <?
 
 //---Configuration---//
-$link_folder = "../link/";
+$do_build = (array_key_exists("build", $_REQUEST) && $_REQUEST["build"]);
+$build_folder = "../build/"; 
+$link_folder = (!$do_build ? "../link/" : $build_folder);
 $namespace_prefix = "Heidi";
 $src_folder = "./";
 $src_classes_folder = $src_folder . "classes/";
@@ -18,6 +20,9 @@ $link_index_file = $link_folder . "index." . ($automake ? "php" : "html");
 $version_file = $src_folder . "version.txt";
 $src_overrides_file = $src_folder . "overrides.css";
 $link_providers_folder = $link_folder . "providers/";
+$build_file_folder = "../";
+$readme_file_name = "readme.txt";
+$readme_file_path = $src_folder . $readme_file_name;
 
 
 //---Remove Link Folder---//
@@ -40,6 +45,10 @@ function rrmdir($dir) { // http://www.php.net/manual/en/function.rmdir.php#98622
 }
 
 rrmdir($link_folder);
+
+if(is_dir($build_folder))	{ // Doesn't seem to be deleted by the rrmdir
+	rmdir($build_folder);
+}
 
 $made_link_folder = mkdir($link_folder);
 if($made_link_folder === false)	{
@@ -131,7 +140,7 @@ elseif($_REQUEST["minor"])	{ // Mark this as a minor version
 	$version_number["minor"]++;
 	$version_number["revision"] = 0;
 }
-else	{ // This is a revision version, increment it.
+elseif(!$do_build)	{ // This is a revision version, increment it. Don't do this auto increment if we're just building
 	$version_number["revision"]++;
 }
 
@@ -323,4 +332,81 @@ if($copied_index_file === false)	{
 if($automake)	{
 	echo "<script type='text/javascript'>document.location.href = '" . $link_index_file . "';</script>";
 	return false;
+}
+
+
+//---Check Build---//
+if($do_build)	{
+	//---Check File---//
+	$build_filename = $build_file_folder . "heidijs-" . $version_number . ".zip";
+	if(file_exists($build_filename))	{
+		if(!unlink($build_filename))	{
+			echo "Error: unable to remove existing build file.";
+			exit;
+		}
+	}
+
+	
+	//---Create ZIP---//
+	$archive = new ZipArchive();
+	$can_write_zip = $archive->open($build_filename, ZIPARCHIVE::CREATE);
+	if(!$can_write_zip)	{
+		echo "Error: unable to create zip for building.";
+		exit;
+	}
+	
+	function add_files_to_zip(&$in_archive, $in_folder, $in_base_folder)	{
+		$handle = opendir($in_folder);
+		if(!$handle)	{
+			echo "Error: unable to open " . $in_folder . " to create build.";
+			exit;
+		}
+		
+		while(($file_name = readdir($handle)) !== false)	{
+			if($file_name == "." || $file_name == "..")	{
+				continue;
+			}
+			
+			$file_path = $in_folder . $file_name;
+			$zipped_file_name = substr($file_path, strlen($in_base_folder));
+			if(is_dir($file_path))	{
+				$added_folder = $in_archive->addEmptyDir($zipped_file_name);
+				if(!$added_folder)	{
+					echo "Error: unable to add folder " . $zipped_file_name . " during build.";
+					exit;
+				}
+				
+				add_files_to_zip($in_archive, $file_path . "/", $in_base_folder);
+				continue;
+			}
+			
+			$added_file = $in_archive->addFile($file_path, $zipped_file_name);
+			if(!$added_file)	{
+				echo "Error: unable to add file " . $file_path . " to build.";
+				exit;
+			}
+		}
+	}
+	
+	add_files_to_zip($archive, $build_folder, $build_folder);
+	
+	
+	//---Add Readme---//
+	$readme_contents = file_get_contents($readme_file_path);
+	if(!$readme_contents)	{
+		echo "Error: can't read contents of readme " . $readme_file_path . " in build.";
+		exit;
+	}
+	
+	$added_readme = $archive->addFromString($readme_file_name, str_replace(array("%%VERSION_NUMBER%%", "%%BUILD_DATE%%"), array($version_number, date("n/j/Y g:i:s A e")), $readme_contents));
+	if(!$added_readme)	{
+		echo "Error: can't add readme to build.";
+		exit;
+	}
+	
+	
+	//---Finalize ZIP---//
+	$archive->close();
+	rrmdir($build_folder);
+	echo "Create build of HeidiJS " . $version_number;
 }
