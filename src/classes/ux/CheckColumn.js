@@ -27,7 +27,7 @@ Ext.define('Ext.ux.CheckColumn', {
                 checked = !record.get(dataIndex);
                 
             record.set(dataIndex, checked);
-            this.fireEvent('checkchange', this, recordIndex, checked);
+            this.fireEvent('checkchange', this, recordIndex, checked, record);
             // cancel selection.
             return false;
         } else {

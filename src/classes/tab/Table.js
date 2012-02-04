@@ -20,6 +20,31 @@
 				TABLE_EDITOR_BASE_CLS = "tab-table-data-type-";
 			
 			
+			//---Column Variables---//
+			function isNumberDataType(inRecord)	{
+				var dataType = inRecord.get("data_type");
+				
+				return (dataType.indexOf("INT") != -1 || dataType == "FLOAT" || dataType == "DOUBLE" || dataType == "DECIMAL");
+			};
+			
+			var numberColumnApplies = {
+				renderer:function(inValue, inMeta, inRecord)	{
+					if(!isNumberDataType(inRecord))	{
+						return "";
+					}
+					
+					return Ext.ux.CheckColumn.prototype.renderer.apply(this, arguments);
+				},
+				listeners:{
+					checkchange:function(inColumn, inRecordIndex, inChecked, inRecord)	{
+						if(inChecked && !isNumberDataType(inRecord))	{
+							inRecord.set(this.dataIndex, 0);
+						}
+					}
+				}
+			};
+			
+			
 			//---Create Basic Form---//
 			this.basicForm = Ext.create("Ext.form.Panel",	{
 				title:"Basic",
@@ -436,6 +461,9 @@
 						dataIndex:"length",
 						width:12.5,
 						renderer:tableEditorGenericColumnRenderer,
+						beforeEdit:function(inRecord)	{
+							return (inRecord.get("data_type").indexOf("TEXT") == -1);
+						},
 						editor:{
 							xtype:"numberfield",
 							allowBlank:true,
@@ -443,29 +471,29 @@
 							allowDecimals:false
 						}
 					},
-					{
+					Ext.apply({
 						xtype:"checkcolumn",
 						text:"Unsigned",
 						dataIndex:"unsigned",
 						width:12.5
-					},
+					}, numberColumnApplies),
 					{
 						xtype:"checkcolumn",
 						text:"Allow Null",
 						dataIndex:"allow_null",
 						width:12.5
 					},
-					{
+					Ext.apply({
 						xtype:"checkcolumn",
 						text:"Zerofill",
 						dataIndex:"zerofill",
 						width:12.5
-					},
+					}, numberColumnApplies),
 					{
 						text:"Default",
 						dataIndex:"default",
 						width:12.5,
-						renderer:function(inValue, inMeta)	{
+						renderer:function(inValue, inMeta, inRecord)	{
 							var tdCls = "",
 								val = (inValue + "").toUpperCase();
 						
@@ -474,15 +502,21 @@
 									tdCls = "tab-table-editor-default-auto-increment";
 									break;
 								case "NULL":
+								case null:
+									if(!inRecord.get("allow_null"))	{
+										tdCls = "tab-table-editor-default-no-default";
+										val = "No default value";
+										break;
+									}
 								case "CURRENT_TIMESTAMP":
 									tdCls = "tab-table-editor-default-null-current-timestamp";
 									break;
-								case "":
-									tdCls = "tab-table-editor-default-no-default";
-									val = "No default value";
-									break;
 								default:
 									tdCls = "tab-table-editor-default-custom-value";
+									
+									if(inRecord.get("data_type").indexOf("CHAR") != -1)	{
+										val = "'" + val + "'";
+									}
 									break;
 							}
 							
@@ -491,13 +525,117 @@
 							return val;
 						},
 						cellSelected:function(inRecord, inEvent)	{
-debugger;
+							if(inRecord.preventCellSelected)	{
+								return false;
+							}
+							
+							inRecord.preventCellSelected = true;
+						
 							var currentValue = inRecord.get("default"),
+								dataType = inRecord.get("data_type"),
+								dataTypeIsInt = (dataType.indexOf("INT") != -1),
+								dataTypeIsTimestamp = (dataType == "TIMESTAMP"),
+								dataTypeIsBlobOrText = (dataType.indexOf("BLOB") != -1 || dataType.indexOf("TEXT") != -1),
+								allowNull = inRecord.get("allow_null"),
 								isDefaultValue = (currentValue === null),
-								isNullValue = (currentValue == "null"),
+								isNullValue = (currentValue == "null" && allowNull),
 								isCurrentTimestampValue = false,
 								isAutoIncrementValue = (currentValue == "auto_increment"),
-								isCustomValue = !isDefaultValue && !isNullValue && !isCurrentTimestampValue && !isAutoIncrementValue;
+								isCustomValue = !isDefaultValue && !isNullValue && !isCurrentTimestampValue && !isAutoIncrementValue,
+								menuItems = [],
+								separator = false;
+							
+							menuItems.push({
+								text:"No default value",
+								checked:isDefaultValue,
+								updateRecord:function()	{
+									inRecord.set("default", null);
+								}
+							});
+							separator = true;
+							
+							if(!dataTypeIsBlobOrText)	{
+								if(separator)	{
+									menuItems.push({
+										xtype:"menuseparator"
+									});
+								}
+								separator = true;
+								
+								menuItems.push({
+									text:"Custom",
+									checked:isCustomValue,
+									checkChanged:function(inChecked)	{
+										this.nextSibling()[inChecked ? "show" : "hide"]();
+									},
+									updateRecord:function()	{
+										inRecord.set("default", this.nextSibling().getValue());
+									}
+								});
+								menuItems.push({
+									xtype:"textarea",
+									name:"custom",
+									anchor:"100%",
+									height:75,
+									hidden:true,
+									value:(isCustomValue ? currentValue : "")
+								});
+							}
+							
+							if(allowNull || dataTypeIsTimestamp)	{
+								if(separator)	{
+									menuItems.push({
+										xtype:"menuseparator"
+									});
+								}
+								separator = true;
+								
+								if(allowNull)	{
+									menuItems.push({
+										text:"NULL",
+										checked:isNullValue,
+										updateRecord:function()	{
+debugger;
+										}
+									});
+								}
+								if(dataTypeIsTimestamp)	{
+									menuItems.push({
+										text:"CURRENT_TIMESTAMP",
+										checked:isCurrentTimestampValue,
+										checkChanged:function(inChecked)	{
+											this.nextSibling()[inChecked ? "show" : "hide"]();
+										},
+										updateRecord:function()	{
+debugger;
+										}
+									});
+									menuItems.push({
+										group:"tabTableEditorDefaultColumnMenuUnique",
+										text:"On Update CURRENT_TIMESTAMP",
+										name:"onUpdateCurrentTimestamp",
+										hidden:true
+									});
+								}
+							}
+							
+							if(dataTypeIsInt)	{
+								if(separator)	{
+									menuItems.push({
+										xtype:"menuseparator"
+									});
+								}
+								separator = true;
+								
+								menuItems.push({
+									text:"AUTO_INCREMENT",
+									checked:isAutoIncrementValue,
+									updateRecord:function()	{
+										inRecord.set("default", "auto_increment");
+									}
+								});
+							}
+							
 								
 							var newMenu = Ext.create("Ext.menu.Menu", {
 								defaults:{
@@ -514,57 +652,7 @@ debugger;
 										}
 									}
 								},
-								items:[
-									{
-										text:"No default value",
-										checked:isDefaultValue
-									},
-									{
-										xtype:"menuseparator"
-									},
-									{
-										text:"Custom",
-										checked:isCustomValue,
-										checkChanged:function(inChecked)	{
-											this.nextSibling()[inChecked ? "show" : "hide"]();
-										}
-									},
-									{
-										xtype:"textarea",
-										name:"custom",
-										anchor:"100%",
-										height:75,
-										hidden:!isCustomValue,
-										value:currentValue
-									},
-									{
-										xtype:"menuseparator"
-									},
-									{
-										text:"NULL",
-										checked:isNullValue
-									},
-									{
-										text:"CURRENT_TIMESTAMP",
-										checked:isCurrentTimestampValue,
-										checkChanged:function(inChecked)	{
-											this.nextSibling()[inChecked ? "show" : "hide"]();
-										}
-									},
-									{
-										group:"tabTableEditorDefaultColumnMenuUnique",
-										text:"On Update CURRENT_TIMESTAMP",
-										name:"onUpdateCurrentTimestamp",
-										hidden:true
-									},
-									{
-										xtype:"menuseparator"
-									},
-									{
-										text:"AUTO_INCREMENT",
-										checked:isAutoIncrementValue
-									}
-								],
+								items:menuItems,
 								dockedItems:[
 									{
 										xtype:"toolbar",
@@ -576,7 +664,12 @@ debugger;
 											{
 												text:"OK",
 												handler:function()	{
-debugger;
+													var checkedMenuItem = newMenu.items.findBy(function(inMenuItem) { return inMenuItem.checked; });
+													if(!checkedMenuItem)	{
+														return Ext.MessageBox.alert("Error", "Please select at least one option.");
+													}
+													
+													checkedMenuItem.updateRecord();
 													newMenu.hide();
 												}
 											},
@@ -588,7 +681,12 @@ debugger;
 											}
 										]
 									}
-								]
+								],
+								listeners:{
+									hide:function()	{
+										inRecord.preventCellSelected = false;
+									}
+								}
 							});
 							
 							newMenu.showAt(inEvent.xy[0], inEvent.xy[1]);
@@ -610,7 +708,12 @@ debugger;
 				},
 				plugins:[
 					Ext.create("Ext.grid.plugin.CellEditing", {
-						clicksToEdit:1
+						clicksToEdit:1,
+						listeners:{
+							beforeedit:function(inEditObject)	{
+								return (typeof(inEditObject.column.beforeEdit) == "function" ? inEditObject.column.beforeEdit(inEditObject.record) : true);
+							}
+						}
 					})
 				]
 			});
