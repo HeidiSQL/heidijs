@@ -7,6 +7,26 @@
 	background-image: url(../images/table_gear.png);
 }
 
+.icon-tab-table-add	{
+	background-image: url(../images/add.png);
+}
+
+.icon-tab-table-remove	{
+	background-image: url(../images/delete.png);
+}
+
+.icon-tab-table-up	{
+	background-image: url(../images/arrow_up.png);
+}
+
+.icon-tab-table-down	{
+	background-image: url(../images/arrow_down.png);
+}
+
+.icon-tab-table-help	{
+	background-image: url(../images/help.png);
+}
+
 
 /*---Tab Styles---*/
 .tab-table-body {

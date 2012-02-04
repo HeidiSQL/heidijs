@@ -8,6 +8,31 @@
 		layout:"border",
 		
 		initComponent:function()	{
+			//---Set Docked Items---//
+			this.dockedItems = [
+				{
+					xtype:"toolbar",
+					dock:"top",
+					items:[
+						{
+							text:"Save",
+							iconCls:"icon-tab-table-save",
+							handler:function()	{
+debugger;
+							}
+						},
+						{
+							text:"Discard",
+							iconCls:"icon-tab-table-close",
+							handler:function()	{
+debugger;
+							}
+						}
+					]
+				}
+			];
+		
+		
 			//---Call Parent---//
 			this.callParent(arguments);
 			
@@ -143,7 +168,7 @@
 				});
 			}
 			
-			this.gridPanel = this.add({
+			var gridPanel = this.gridPanel = this.add({
 				xtype:"gridpanel",
 				
 				region:"center",
@@ -440,6 +465,8 @@
 							},
 							valueField:"display",
 							displayField:"display",
+							typeAhead:true,
+							forceSelection:true,
 							listConfig:{
 								cls:TABLE_EDITOR_BASE_CLS + "list",
 								minWidth:125,
@@ -509,6 +536,7 @@
 										break;
 									}
 								case "CURRENT_TIMESTAMP":
+								case "ON UPDATE CURRENT_TIMESTAMP":
 									tdCls = "tab-table-editor-default-null-current-timestamp";
 									break;
 								default:
@@ -539,7 +567,8 @@
 								allowNull = inRecord.get("allow_null"),
 								isDefaultValue = (currentValue === null),
 								isNullValue = (currentValue == "null" && allowNull),
-								isCurrentTimestampValue = false,
+								isCurrentTimestampValue = (currentValue.indexOf("CURRENT_TIMESTAMP") != -1),
+								isCurrentTimestampOnUpdateValue = (isCurrentTimestampValue && currentValue.indexOf("ON UPDATE CURRENT_TIMESTAMP")),
 								isAutoIncrementValue = (currentValue == "auto_increment"),
 								isCustomValue = !isDefaultValue && !isNullValue && !isCurrentTimestampValue && !isAutoIncrementValue,
 								menuItems = [],
@@ -595,7 +624,7 @@
 										text:"NULL",
 										checked:isNullValue,
 										updateRecord:function()	{
-debugger;
+											inRecord.set("default", null);
 										}
 									});
 								}
@@ -607,14 +636,15 @@ debugger;
 											this.nextSibling()[inChecked ? "show" : "hide"]();
 										},
 										updateRecord:function()	{
-debugger;
+											inRecord.set("default", (this.nextSibling().checked ? "ON UPDATE " : "") + "CURRENT_TIMESTAMP");
 										}
 									});
 									menuItems.push({
 										group:"tabTableEditorDefaultColumnMenuUnique",
 										text:"On Update CURRENT_TIMESTAMP",
 										name:"onUpdateCurrentTimestamp",
-										hidden:true
+										checked:isCurrentTimestampOnUpdateValue,
+										hidden:!isCurrentTimestampValue
 									});
 								}
 							}
@@ -715,8 +745,99 @@ debugger;
 							}
 						}
 					})
+				],
+				dockedItems:[
+					{
+						xtype:"toolbar",
+						dock:"top",
+						items:[
+							{
+								text:"Add",
+								iconCls:"icon-tab-table-add",
+								handler:function()	{
+									gridPanel.store.add({});
+									gridPanel.plugins[0].startEditByPosition({row:gridPanel.store.getCount() - 1, column:1});
+								}
+							},
+							{
+								text:"Remove",
+								iconCls:"icon-tab-table-remove",
+								handler:function()	{
+									getSelectionAndExecute(function(inSelection)	{
+										Ext.MessageBox.confirm("Confirm Remove", "Are you sure you want to remove the selected column?", function(inButton)	{
+											if(inButton != "yes")	{
+												return false;
+											}
+											
+											gridPanel.store.remove(inSelection);
+										});
+									});
+								}
+							},
+							{
+								xtype:"tbseparator"
+							},
+							{
+								text:"Up",
+								iconCls:"icon-tab-table-up",
+								handler:function()	{
+									getSelectionAndExecute(function(inSelection)	{
+										changeRecordPosition(inSelection, -1);
+									});
+								}
+							},
+							{
+								text:"Down",
+								iconCls:"icon-tab-table-down",
+								handler:function()	{
+									getSelectionAndExecute(function(inSelection)	{
+										changeRecordPosition(inSelection, 1);
+									});
+								}
+							},
+							{
+								xtype:"tbfill"
+							},
+							{
+								text:"Help",
+								iconCls:"icon-tab-table-help",
+								handler:function()	{
+debugger;
+								}
+							}
+						]
+					}
 				]
 			});
+			
+			
+			//---Selection Functions---//
+			function getSelectionAndExecute(inCallback)	{
+				var currentPosition = gridPanel.getSelectionModel().getCurrentPosition(),
+					record = (currentPosition && gridPanel.store.getAt(currentPosition.row));
+				
+				if(!record)	{
+					return false;
+				}
+				
+				inCallback(record);
+			}
+			
+			function changeRecordPosition(inRecord, inIncrement)	{
+				var recordIndex = gridPanel.store.indexOf(inRecord),
+					newRecordIndex = recordIndex + inIncrement;
+				
+				if(newRecordIndex < 0 || newRecordIndex == gridPanel.store.getCount())	{
+					return false;
+				}
+				
+				var selectionModel = gridPanel.getSelectionModel(),
+					currentPosition = selectionModel.getCurrentPosition();
+				
+				gridPanel.store.remove(inRecord);
+				gridPanel.store.insert(newRecordIndex, inRecord);
+				selectionModel.setCurrentPosition({row:newRecordIndex, column:currentPosition.column});
+			}
 		},
 		
 		syncWithTreeNode:function(inTreeNode)	{
